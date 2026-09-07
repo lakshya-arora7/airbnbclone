@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
-import CategoryBar from "@/components/categories/CategoryBar";
 import ListingCard from "@/components/listings/ListingCard";
 import FilterModal from "@/components/filters/FilterModal";
 import { Listing } from "@/types";
@@ -211,20 +210,7 @@ export default function Home() {
         onSearch={(params) => setSearchParams(params)}
       />
 
-      {/* Category Filter Bar with Authentic Icons */}
-      {activeMode !== "experiences" && (
-        <CategoryBar
-          selectedCategory={selectedCategory}
-          onSelectCategory={(id) => setSelectedCategory(id)}
-          onOpenFilters={() => setIsFilterOpen(true)}
-          filterCount={
-            (filterParams.minPrice ? 1 : 0) +
-            (filterParams.maxPrice ? 1 : 0) +
-            (filterParams.propertyType ? 1 : 0) +
-            filterParams.amenities.length
-          }
-        />
-      )}
+
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         {/* ========================================================================= */}
