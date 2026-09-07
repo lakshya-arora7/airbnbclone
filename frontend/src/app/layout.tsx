@@ -4,7 +4,6 @@ import { AuthPersonaProvider } from "@/context/AuthPersonaContext";
 import { LanguageCurrencyProvider } from "@/context/LanguageCurrencyContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import LanguageCurrencyModal from "@/components/modals/LanguageCurrencyModal";
-import Footer from "@/components/footer/Footer";
 
 export const metadata: Metadata = {
   title: "Airbnb | Holiday Rentals, Cabins, Beach Houses & Experiences",
@@ -23,7 +22,6 @@ export default function RootLayout({
           <LanguageCurrencyProvider>
             <WishlistProvider>
               <div className="flex-1">{children}</div>
-              <Footer />
               <LanguageCurrencyModal />
             </WishlistProvider>
           </LanguageCurrencyProvider>
