@@ -69,8 +69,52 @@ npm run dev
 
 ## Key Features
 
-1. **Brand New Identity**: Sleek `airbnbclone` branding with zero emojis and 100% SVG/Lucide icons.
-2. **True Guest vs. Host Modes**: Immediate switching between travelling and hosting modes.
-3. **Collision & Booking Engine**: Real-time date availability hold and booking conflict prevention.
-4. **Comprehensive Host Suite**: Multi-step listing creation, photo uploads, calendar date blocking, and pricing control.
-5. **Multi-Language & Currency**: Live currency conversions and localized interface dictionaries.
+1. **Authentic Airbnb Identity**: Sleek typography, exact color tokens (`#FF385C`, `#222222`), photo-forward layouts, and zero emojis with clean SVG icons.
+2. **True Guest vs. Host Modes**: Immediate switching between travelling (Guest) and hosting (Host) personas with role-based navigation.
+3. **Collision & Booking Engine**: Real-time date availability checks, calendar blocking, and double-booking prevention.
+4. **Comprehensive Host Suite**: Full CRUD listing creation, photo uploads, pricing rules, calendar date blocking, and booking management.
+5. **Multi-Language & Currency**: Live currency conversions (INR, USD, EUR, GBP, JPY) and multi-language support.
+
+---
+
+## Database Schema Design (SQLite & SQLAlchemy)
+
+The application uses a relational SQLite database with foreign key cascades and data integrity constraints:
+
+```
+[USERS] 1 ──── ∞ [LISTINGS] (host_id)
+  │                 │
+  │                 ├── 1 ──── ∞ [LISTING_IMAGES] (listing_id, cascade delete)
+  │                 ├── 1 ──── ∞ [BOOKINGS] (listing_id, date range block)
+  │                 └── 1 ──── ∞ [REVIEWS] (listing_id, 5-star metrics)
+  │
+  ├── 1 ──── ∞ [BOOKINGS] (guest_id)
+  ├── 1 ──── ∞ [REVIEWS] (author_id)
+  └── 1 ──── 1 [WISHLISTS] ──── ∞ [WISHLIST_ITEMS] (listing_id)
+```
+
+### Table Breakdown
+- **`users`**: `id`, `email`, `full_name`, `avatar_url`, `role` (`GUEST` / `HOST`), `is_superhost`, `host_since`, `bio`.
+- **`listings`**: `id`, `host_id`, `title`, `subtitle`, `description`, `property_type`, `category`, `city`, `country`, `latitude`, `longitude`, `price_per_night`, `original_price`, `cleaning_fee`, `service_fee_percent`, `max_guests`, `bedrooms`, `beds`, `bathrooms`, `amenities` (JSON), `is_published`, `is_guest_favourite`.
+- **`listing_images`**: `id`, `listing_id`, `url`, `caption`, `display_order`, `is_primary`.
+- **`bookings`**: `id`, `listing_id`, `guest_id`, `confirmation_code`, `check_in`, `check_out`, `guests_count`, `total_price`, `status` (`CONFIRMED`, `CANCELLED`).
+- **`reviews`**: `id`, `listing_id`, `author_id`, `rating`, `cleanliness_rating`, `accuracy_rating`, `checkin_rating`, `communication_rating`, `location_rating`, `value_rating`, `comment`, `created_at`.
+- **`wishlists` & `wishlist_items`**: `id`, `user_id`, `name` & `id`, `wishlist_id`, `listing_id`.
+
+---
+
+## Assumptions Made
+
+1. **Payment Processing**: Real payment gateways (e.g. Stripe) are out of scope per assignment guidelines. The checkout workflow is fully interactive with realistic confirmation codes, price calculations, and state management.
+2. **User Authentication**: Simplified persona-based authentication ("Guest vs. Host") allows effortless testing of guest booking workflows alongside host CRUD dashboards without email verification hurdles.
+3. **Maps / Geolocation**: Implemented using interactive Leaflet maps with custom price bubble pins and coordinate matching, without requiring paid third-party Google Maps API keys.
+4. **Data Persistence**: All created listings, edited bookings, reviews, and wishlist toggles persist directly into the relational SQLite database.
+
+---
+
+## Deployment & Live URLs
+
+- **GitHub Repository**: [https://github.com/lakshya-arora7/airbnbclone](https://github.com/lakshya-arora7/airbnbclone)
+- **Backend (Railway)**: `https://airbnbclone-production-cbcb.up.railway.app`
+- **Frontend (Vercel)**: Deployed from `main` branch.
+
