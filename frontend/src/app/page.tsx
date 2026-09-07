@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
 import ListingCard from "@/components/listings/ListingCard";
 import FilterModal from "@/components/filters/FilterModal";
+import FilterRow, { FilterParams } from "@/components/filters/FilterRow";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import {
@@ -16,7 +17,9 @@ import {
   Map as MapIcon,
   List,
   Home as HomeIcon,
-  Globe as GlobeIcon
+  Globe as GlobeIcon,
+  Loader2,
+  X
 } from "lucide-react";
 
 // Dynamically import Leaflet Map with SSR disabled
@@ -110,14 +113,16 @@ export default function Home() {
     guests?: number;
   }>({});
 
-  const [filterParams, setFilterParams] = useState<{
-    minPrice?: number;
-    maxPrice?: number;
-    propertyType?: string;
-    amenities: string[];
-  }>({
+  const [filterParams, setFilterParams] = useState<FilterParams>({
     amenities: []
   });
+
+  // Pagination & Infinite Scroll State (4 stays per page to easily test multiple pages & scroll)
+  const [scrollMode, setScrollMode] = useState<"pagination" | "infinite">("pagination");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [visibleCount, setVisibleCount] = useState<number>(4);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const PAGE_SIZE = 4;
 
   const fetchListings = useCallback(() => {
     // Fetch live listings from backend + synced local store
@@ -142,6 +147,12 @@ export default function Home() {
       window.removeEventListener("focus", handleUpdate);
     };
   }, [fetchListings]);
+
+  // Reset pagination whenever filters, category, or search query change
+  useEffect(() => {
+    setCurrentPage(1);
+    setVisibleCount(PAGE_SIZE);
+  }, [searchParams, filterParams, selectedCategory, activeMode]);
 
   // Filter listings based on search parameters and selectedCategory
   const filteredListings = useMemo(() => {
@@ -179,6 +190,52 @@ export default function Home() {
     });
   }, [allListings, selectedCategory, searchParams, filterParams]);
 
+  // Total pages
+  const totalPages = Math.max(1, Math.ceil(filteredListings.length / PAGE_SIZE));
+
+  // Displayed listings depending on scrollMode
+  const displayedListings = useMemo(() => {
+    if (scrollMode === "pagination") {
+      const start = (currentPage - 1) * PAGE_SIZE;
+      return filteredListings.slice(start, start + PAGE_SIZE);
+    } else {
+      return filteredListings.slice(0, visibleCount);
+    }
+  }, [filteredListings, scrollMode, currentPage, visibleCount, PAGE_SIZE]);
+
+  // Load more for Infinite Scroll
+  const handleLoadMore = useCallback(() => {
+    if (visibleCount < filteredListings.length && !isLoadingMore) {
+      setIsLoadingMore(true);
+      setTimeout(() => {
+        setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredListings.length));
+        setIsLoadingMore(false);
+      }, 350);
+    }
+  }, [visibleCount, filteredListings.length, isLoadingMore]);
+
+  // IntersectionObserver Sentinel for Infinite Scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (scrollMode !== "infinite") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleCount < filteredListings.length) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    const el = sentinelRef.current;
+    if (el) {
+      observer.observe(el);
+    }
+    return () => {
+      if (el) observer.unobserve(el);
+      observer.disconnect();
+    };
+  }, [scrollMode, visibleCount, filteredListings.length, handleLoadMore]);
+
   // Dynamic search pill summary text
   const searchSummary = useMemo(() => {
     const loc = searchParams.location || undefined;
@@ -210,9 +267,70 @@ export default function Home() {
         onSearch={(params) => setSearchParams(params)}
       />
 
+      {/* Category / Filter Row (Property Type, Price Range, Key Amenities, All Filters Modal) */}
+      <FilterRow
+        filterParams={filterParams}
+        onFilterChange={(newFilters) => setFilterParams(newFilters)}
+        onOpenFilterModal={() => setIsFilterOpen(true)}
+        onClearAll={() => setFilterParams({ amenities: [] })}
+        totalResults={filteredListings.length}
+      />
+
 
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {/* Active Search Criteria Banner (if user searched via search bar) */}
+        {(searchParams.location || searchParams.guests || searchParams.checkIn) && (
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 px-4 py-3 bg-[#F7F7F7] border border-[#EBEBEB] rounded-2xl">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="font-bold text-[#222222]">Applied Search:</span>
+              {searchParams.location && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#DDDDDD] rounded-full font-semibold text-[#222222] shadow-xs">
+                  <span>{searchParams.location}</span>
+                  <button
+                    onClick={() => setSearchParams((prev) => ({ ...prev, location: undefined }))}
+                    className="hover:text-[#FF385C] cursor-pointer"
+                    title="Remove location"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {searchParams.checkIn && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#DDDDDD] rounded-full font-semibold text-[#222222] shadow-xs">
+                  <span>{searchParams.checkIn} – {searchParams.checkOut}</span>
+                  <button
+                    onClick={() => setSearchParams((prev) => ({ ...prev, checkIn: undefined, checkOut: undefined }))}
+                    className="hover:text-[#FF385C] cursor-pointer"
+                    title="Remove dates"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {searchParams.guests && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#DDDDDD] rounded-full font-semibold text-[#222222] shadow-xs">
+                  <span>{searchParams.guests} guests</span>
+                  <button
+                    onClick={() => setSearchParams((prev) => ({ ...prev, guests: undefined }))}
+                    className="hover:text-[#FF385C] cursor-pointer"
+                    title="Remove guests"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={() => setSearchParams({})}
+              className="text-xs font-bold text-[#FF385C] hover:underline cursor-pointer"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+
         {/* ========================================================================= */}
         {/* INTERACTIVE MAP SPLIT SCREEN VIEW                                         */}
         {/* When user clicks "Show map", layout splits into Cards (Left) & Map (Right) */}
@@ -330,11 +448,143 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 py-4">
-                    {filteredListings.map((listing) => (
-                      <ListingCard key={listing.id} listing={listing} />
-                    ))}
-                  </div>
+                  <>
+                    {/* Grid of Listing Cards with Photo, Title, Location, Price/Night, and Rating */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 py-4">
+                      {displayedListings.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} />
+                      ))}
+                    </div>
+
+                    {/* Pagination or Infinite Scroll Controls */}
+                    <div className="mt-12 mb-8 pt-8 border-t border-[#EBEBEB] flex flex-col items-center gap-5 w-full">
+                      {/* View Mode Switcher Pill */}
+                      <div className="flex items-center gap-1 bg-[#F2F2F2] p-1 rounded-full text-xs font-semibold text-[#717171]">
+                        <button
+                          type="button"
+                          onClick={() => setScrollMode("pagination")}
+                          className={`px-4 py-1.5 rounded-full transition cursor-pointer ${
+                            scrollMode === "pagination"
+                              ? "bg-white text-[#222222] shadow-xs font-bold"
+                              : "hover:text-[#222222]"
+                          }`}
+                        >
+                          Pages (1, 2...)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setScrollMode("infinite")}
+                          className={`px-4 py-1.5 rounded-full transition cursor-pointer ${
+                            scrollMode === "infinite"
+                              ? "bg-white text-[#222222] shadow-xs font-bold"
+                              : "hover:text-[#222222]"
+                          }`}
+                        >
+                          Infinite scroll
+                        </button>
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {scrollMode === "pagination" && (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCurrentPage((p) => Math.max(1, p - 1));
+                                window.scrollTo({ top: 120, behavior: "smooth" });
+                              }}
+                              disabled={currentPage === 1}
+                              className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                              aria-label="Previous page"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                              <button
+                                key={pageNum}
+                                type="button"
+                                onClick={() => {
+                                  setCurrentPage(pageNum);
+                                  window.scrollTo({ top: 120, behavior: "smooth" });
+                                }}
+                                className={`w-9 h-9 rounded-full text-xs font-bold transition cursor-pointer ${
+                                  currentPage === pageNum
+                                    ? "bg-[#222222] text-white shadow-xs"
+                                    : "bg-transparent text-[#222222] hover:bg-[#F7F7F7]"
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            ))}
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCurrentPage((p) => Math.min(totalPages, p + 1));
+                                window.scrollTo({ top: 120, behavior: "smooth" });
+                              }}
+                              disabled={currentPage === totalPages}
+                              className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                              aria-label="Next page"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <p className="text-xs text-[#717171]">
+                            Showing {(currentPage - 1) * PAGE_SIZE + 1} –{" "}
+                            {Math.min(currentPage * PAGE_SIZE, filteredListings.length)} of{" "}
+                            {filteredListings.length} stays
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Infinite Scroll Controls */}
+                      {scrollMode === "infinite" && (
+                        <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+                          <div className="w-full text-center space-y-1.5">
+                            <p className="text-xs text-[#717171] font-medium">
+                              Showing {Math.min(visibleCount, filteredListings.length)} of {filteredListings.length} stays
+                            </p>
+                            <div className="w-full bg-[#EBEBEB] h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className="bg-[#222222] h-full transition-all duration-300 rounded-full"
+                                style={{
+                                  width: `${Math.min(100, (visibleCount / filteredListings.length) * 100)}%`
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {visibleCount < filteredListings.length ? (
+                            <button
+                              type="button"
+                              onClick={handleLoadMore}
+                              disabled={isLoadingMore}
+                              className="px-6 py-2.5 rounded-full border border-[#222222] bg-white text-[#222222] hover:bg-[#F7F7F7] text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-xs"
+                            >
+                              {isLoadingMore ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  <span>Loading more stays...</span>
+                                </>
+                              ) : (
+                                <span>Show more stays ({filteredListings.length - visibleCount} remaining)</span>
+                              )}
+                            </button>
+                          ) : (
+                            <p className="text-xs text-[#717171] italic">
+                              You’ve viewed all {filteredListings.length} stays
+                            </p>
+                          )}
+
+                          <div ref={sentinelRef} className="h-4 w-full pointer-events-none" />
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </>
             )}
@@ -395,7 +645,7 @@ export default function Home() {
                       <div>
                         <h2 className="text-xl font-bold text-[#222222] mb-4">Verified Stays</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10">
-                          {filteredListings.map((listing) => (
+                          {displayedListings.map((listing) => (
                             <ListingCard key={listing.id} listing={listing} />
                           ))}
                         </div>

@@ -164,17 +164,44 @@ export default function ListingCard({ listing, isFavorited, onToggleFavorite }: 
               </div>
             </>
           ) : (
-            /* Layout for Homes / Stays matching Screenshot 1 */
+            /* Layout for Homes / Stays matching official Airbnb Card Design */
             <>
-              <div className="flex items-center justify-between font-bold text-sm text-[#222222]">
-                <span className="truncate">{listing.title}</span>
+              {/* Row 1: Title & Rating */}
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-bold text-sm text-[#222222] truncate flex-1" title={listing.title}>
+                  {listing.title}
+                </span>
+                {listing.rating > 0 && (
+                  <div className="flex items-center gap-1 text-xs font-semibold text-[#222222] flex-shrink-0">
+                    <Star className="w-3.5 h-3.5 fill-[#222222] text-[#222222]" />
+                    <span>{listing.rating.toFixed(1)}</span>
+                    {listing.reviewCount > 0 && (
+                      <span className="text-[#717171] font-normal text-[11px]">({listing.reviewCount})</span>
+                    )}
+                  </div>
+                )}
               </div>
-              <p className="text-[#717171] flex items-center gap-1">
-                <span>₹{listing.pricePerNight.toLocaleString("en-IN")} for 1 night</span>
-                <span>·</span>
-                <Star className="w-3 h-3 fill-[#222222] text-[#222222] inline -mt-0.5" />
-                <span>{listing.rating.toFixed(listing.rating % 1 === 0 ? 1 : 2)}</span>
+
+              {/* Row 2: Location */}
+              <p className="text-xs text-[#717171] truncate">
+                {listing.subtitle || `${listing.city}, ${listing.country}`}
               </p>
+
+              {/* Row 3: Property Type & Bedroom Details */}
+              <p className="text-[11px] text-[#717171] truncate">
+                {listing.propertyType} · {listing.bedrooms || 1} bed{(listing.bedrooms || 1) > 1 ? "s" : ""} · Up to {listing.maxGuests || 2} guests
+              </p>
+
+              {/* Row 4: Price per night */}
+              <div className="mt-1 flex items-baseline gap-1.5 text-xs text-[#222222]">
+                <span className="font-extrabold text-sm">
+                  ₹{listing.pricePerNight.toLocaleString("en-IN")}
+                </span>
+                <span className="text-[#717171] text-xs font-normal">night</span>
+                {listing.cleaningFee > 0 && (
+                  <span className="text-[10px] text-[#717171]">· ₹{listing.cleaningFee} clean</span>
+                )}
+              </div>
             </>
           )}
         </div>

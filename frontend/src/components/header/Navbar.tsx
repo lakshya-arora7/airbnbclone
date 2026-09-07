@@ -123,23 +123,25 @@ export default function Navbar({
     const totalGuests = searchState.adults + searchState.children;
     const loc = searchState.location.trim();
 
-    onSearch?.({
-      location: loc || undefined,
-      checkIn: searchState.startDate || undefined,
-      checkOut: searchState.endDate || undefined,
-      guests: totalGuests > 0 ? totalGuests : undefined
-    });
+    if (onSearch) {
+      onSearch({
+        location: loc || undefined,
+        checkIn: searchState.startDate || undefined,
+        checkOut: searchState.endDate || undefined,
+        guests: totalGuests > 0 ? totalGuests : undefined
+      });
+      handleCloseSearchDeck();
+    } else {
+      handleCloseSearchDeck();
+      const locSlug = loc ? encodeURIComponent(loc.replace(/\s+/g, "-")) : "all";
+      const query = new URLSearchParams();
+      if (searchState.startDate) query.set("checkin", searchState.startDate);
+      if (searchState.endDate) query.set("checkout", searchState.endDate);
+      if (totalGuests > 0) query.set("guests", String(totalGuests));
 
-    handleCloseSearchDeck();
-
-    const locSlug = loc ? encodeURIComponent(loc.replace(/\s+/g, "-")) : "all";
-    const query = new URLSearchParams();
-    if (searchState.startDate) query.set("checkin", searchState.startDate);
-    if (searchState.endDate) query.set("checkout", searchState.endDate);
-    if (totalGuests > 0) query.set("guests", String(totalGuests));
-
-    const queryString = query.toString();
-    router.push(`/s/${locSlug}/homes${queryString ? `?${queryString}` : ""}`);
+      const queryString = query.toString();
+      router.push(`/s/${locSlug}/homes${queryString ? `?${queryString}` : ""}`);
+    }
   };
 
   return (
