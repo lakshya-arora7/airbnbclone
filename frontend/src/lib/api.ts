@@ -461,6 +461,116 @@ export const api = {
   },
 
   /**
+   * Update an existing property listing as host.
+   */
+  async updateListing(listingId: number, updateData: any, hostId: number = 2): Promise<Listing | null> {
+    let updatedListing: Listing | null = null;
+    try {
+      const res = await fetch(`${API_BASE_URL}/listings/${listingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": hostId.toString(),
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        updatedListing = normalizeListing(data);
+      }
+    } catch (err) {
+      console.warn("[API] Unable to update listing via backend, applying local update:", err);
+    }
+
+    const local = getLocalCustomListings();
+    const existing = local.find((l) => l.id === listingId);
+    if (existing) {
+      const merged: Listing = {
+        ...existing,
+        ...updateData,
+        pricePerNight: updateData.price_per_night ?? updateData.pricePerNight ?? existing.pricePerNight,
+        cleaningFee: updateData.cleaning_fee ?? updateData.cleaningFee ?? existing.cleaningFee,
+        maxGuests: updateData.max_guests ?? updateData.maxGuests ?? existing.maxGuests,
+        bedrooms: updateData.bedrooms ?? existing.bedrooms,
+        beds: updateData.beds ?? existing.beds,
+        bathrooms: updateData.bathrooms ?? existing.bathrooms,
+        title: updateData.title ?? existing.title,
+        description: updateData.description ?? existing.description,
+        isPublished: updateData.is_published ?? updateData.isPublished ?? existing.isPublished,
+      };
+      saveLocalCustomListing(merged);
+      if (!updatedListing) updatedListing = merged;
+    } else if (updatedListing) {
+      saveLocalCustomListing(updatedListing);
+    }
+
+    return updatedListing;
+  },
+
+  /**
+   * Fetch all bookings associated with a specific listing.
+   */
+  async getListingBookings(listingId: number, hostId: number = 2): Promise<any[]> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/bookings/listing/${listingId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": hostId.toString(),
+        },
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      console.warn("[API] Unable to fetch bookings for listing:", err);
+    }
+    return [];
+  },
+
+  /**
+   * Update/modify a reservation (check-in, check-out, guests, status).
+   */
+  async updateBooking(
+    bookingId: number,
+    payload: { checkIn?: string; checkOut?: string; guestsCount?: number; status?: string },
+    userId: number = 1
+  ): Promise<any> {
+    try {
+      const body: any = {};
+      if (payload.checkIn) body.check_in = payload.checkIn;
+      if (payload.checkOut) body.check_out = payload.checkOut;
+      if (payload.guestsCount) body.guests_count = payload.guestsCount;
+      if (payload.status) body.status = payload.status;
+
+      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("airbnb_bookings_updated"));
+        }
+        return { success: true, data };
+      }
+      const errJson = await res.json().catch(() => ({}));
+      return { success: false, error: errJson.detail || "Failed to update booking." };
+    } catch (err) {
+      console.warn("[API] Modify booking error:", err);
+      return { success: false, error: "Network error modifying booking." };
+    }
+  },
+
+  /**
    * Fetch current user's wishlist listings from backend.
    */
   async getWishlist(userId: number = 1): Promise<Listing[]> {

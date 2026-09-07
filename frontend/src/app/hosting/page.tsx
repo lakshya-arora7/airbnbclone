@@ -42,6 +42,9 @@ import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import CreateListingModal from "@/components/hosting/CreateListingModal";
+import EditListingModal from "@/components/hosting/EditListingModal";
+import ModifyBookingModal from "@/components/hosting/ModifyBookingModal";
+import ListingBookingsModal from "@/components/hosting/ListingBookingsModal";
 
 type HostTab = "today" | "calendar" | "listings" | "messages";
 
@@ -120,6 +123,14 @@ export default function HostDashboardPage() {
   const [listingSearchQuery, setListingSearchQuery] = useState("");
   const [listingStatusFilter, setListingStatusFilter] = useState<"all" | "active" | "draft">("all");
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  // Edit Listing & Modify Booking Modal States
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [isEditListingModalOpen, setIsEditListingModalOpen] = useState<boolean>(false);
+  const [activeListingForBookings, setActiveListingForBookings] = useState<Listing | null>(null);
+  const [isListingBookingsModalOpen, setIsListingBookingsModalOpen] = useState<boolean>(false);
+  const [editingBooking, setEditingBooking] = useState<any | null>(null);
+  const [isModifyBookingModalOpen, setIsModifyBookingModalOpen] = useState<boolean>(false);
 
   // Messages & Reservations state from live backend
   const [hostReservations, setHostReservations] = useState<any[]>([]);
@@ -264,6 +275,37 @@ export default function HostDashboardPage() {
     setUserListings((prev) => prev.filter((l) => l.id !== listingId));
     setSuccessToast("Listing removed successfully.");
     setTimeout(() => setSuccessToast(null), 4000);
+  };
+
+  const handleOpenEditListing = (listing: Listing) => {
+    setEditingListing(listing);
+    setIsEditListingModalOpen(true);
+  };
+
+  const handleListingUpdated = (updated: Listing) => {
+    setUserListings((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+    setSuccessToast(`"${updated.title}" updated successfully!`);
+    setTimeout(() => setSuccessToast(null), 5000);
+  };
+
+  const handleOpenListingBookings = (listing: Listing) => {
+    setActiveListingForBookings(listing);
+    setIsListingBookingsModalOpen(true);
+  };
+
+  const handleOpenModifyBooking = (booking: any) => {
+    setEditingBooking(booking);
+    setIsModifyBookingModalOpen(true);
+  };
+
+  const handleBookingUpdated = (updated: any) => {
+    setHostReservations((prev) =>
+      prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b))
+    );
+    setSuccessToast(
+      `Reservation #${updated.confirmation_code || updated.confirmationCode} updated successfully!`
+    );
+    setTimeout(() => setSuccessToast(null), 5000);
   };
 
   const filteredThreads = chatFilter === "unread"
@@ -494,15 +536,24 @@ export default function HostDashboardPage() {
                           </span>
                           <p className="text-[11px] text-[#717171] font-semibold uppercase">{booking.status}</p>
                         </div>
-                        <button
-                          onClick={() => {
-                            setActiveTab("messages");
-                            setActiveThreadId(booking.id);
-                          }}
-                          className="text-xs font-bold text-[#222222] underline hover:text-black cursor-pointer"
-                        >
-                          Message guest
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleOpenModifyBooking(booking)}
+                            className="text-xs font-bold text-sky-700 underline hover:text-sky-900 cursor-pointer flex items-center gap-1"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                            <span>Modify booking</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setActiveTab("messages");
+                              setActiveThreadId(booking.id);
+                            }}
+                            className="text-xs font-bold text-[#222222] underline hover:text-black cursor-pointer"
+                          >
+                            Message guest
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -960,7 +1011,23 @@ export default function HostDashboardPage() {
                               <span className="text-[11px] text-[#717171]"> / night</span>
                             </div>
 
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                              <button
+                                onClick={() => handleOpenListingBookings(item)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer"
+                                title="Manage bookings for this stay"
+                              >
+                                <CalendarIcon className="w-3 h-3" />
+                                <span>Bookings</span>
+                              </button>
+                              <button
+                                onClick={() => handleOpenEditListing(item)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#F7F7F7] hover:bg-[#EBEBEB] text-[#222222] border border-[#DDDDDD] transition cursor-pointer"
+                                title="Edit listing details"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
                               <Link
                                 href={`/rooms/${item.id}`}
                                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#F7F7F7] hover:bg-[#EBEBEB] text-[#222222] border border-[#DDDDDD] transition cursor-pointer"
@@ -969,7 +1036,6 @@ export default function HostDashboardPage() {
                                 <span>View</span>
                                 <ExternalLink className="w-3 h-3" />
                               </Link>
-
                               <button
                                 onClick={(e) => handleDeleteListing(item.id, e)}
                                 className="w-7 h-7 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50 flex items-center justify-center transition cursor-pointer"
@@ -1119,6 +1185,22 @@ export default function HostDashboardPage() {
                             {/* Actions */}
                             <td className="py-3.5 px-4 text-right">
                               <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleOpenListingBookings(item)}
+                                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer"
+                                  title="Manage bookings for this stay"
+                                >
+                                  <CalendarIcon className="w-3 h-3" />
+                                  <span>Bookings</span>
+                                </button>
+                                <button
+                                  onClick={() => handleOpenEditListing(item)}
+                                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#F7F7F7] hover:bg-[#EBEBEB] text-[#222222] border border-[#DDDDDD] transition cursor-pointer"
+                                  title="Edit listing details"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                  <span>Edit</span>
+                                </button>
                                 <Link
                                   href={`/rooms/${item.id}`}
                                   className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#F7F7F7] hover:bg-[#EBEBEB] text-[#222222] border border-[#DDDDDD] transition cursor-pointer"
@@ -1652,6 +1734,36 @@ export default function HostDashboardPage() {
         onClose={() => setIsCreateListingModalOpen(false)}
         onSuccess={handleListingCreated}
         hostId={persona.id || 2}
+      />
+
+      {/* 8. Edit Listing Modal */}
+      <EditListingModal
+        isOpen={isEditListingModalOpen}
+        listing={editingListing}
+        onClose={() => setIsEditListingModalOpen(false)}
+        onSuccess={handleListingUpdated}
+        hostId={persona.id || 2}
+      />
+
+      {/* 9. Listing Bookings Modal */}
+      <ListingBookingsModal
+        isOpen={isListingBookingsModalOpen}
+        listing={activeListingForBookings}
+        onClose={() => setIsListingBookingsModalOpen(false)}
+        onModifyBooking={(booking) => {
+          setIsListingBookingsModalOpen(false);
+          handleOpenModifyBooking(booking);
+        }}
+        hostId={persona.id || 2}
+      />
+
+      {/* 10. Modify Booking Modal */}
+      <ModifyBookingModal
+        isOpen={isModifyBookingModalOpen}
+        booking={editingBooking}
+        onClose={() => setIsModifyBookingModalOpen(false)}
+        onSuccess={handleBookingUpdated}
+        userId={persona.id || 2}
       />
     </div>
   );

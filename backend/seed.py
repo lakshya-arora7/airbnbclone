@@ -94,8 +94,10 @@ def clean_database(db: Session = None):
             db.close()
 
 def seed_database(db: Session = None):
-    """Clean database without mock listings."""
-    return clean_database(db)
+    """Seed database with 5 authentic sample listings."""
+    from seed_5_sample_listings import seed_five_sample_listings
+    seed_five_sample_listings()
+    return get_seed_stats(db)
 
 def reset_database():
     """Drops all tables and re-creates clean database tables."""

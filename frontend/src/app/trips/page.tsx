@@ -6,9 +6,10 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
-import { Calendar, MapPin, AlertCircle, CheckCircle, ArrowRight, X, Sparkles, Star } from "lucide-react";
+import { Calendar, MapPin, AlertCircle, CheckCircle, ArrowRight, X, Sparkles, Star, Edit3 } from "lucide-react";
 import { api } from "@/lib/api";
 import ReviewModal from "@/components/reviews/ReviewModal";
+import ModifyBookingModal from "@/components/hosting/ModifyBookingModal";
 
 // Dynamically import Leaflet World Map with SSR disabled
 const TripsWorldMap = dynamic(() => import("@/components/map/TripsWorldMap"), {
@@ -44,6 +45,7 @@ export default function MyTripsPage() {
   const [trips, setTrips] = useState<TripRecord[]>([]);
   const [cancellingTripId, setCancellingTripId] = useState<number | null>(null);
   const [reviewingTrip, setReviewingTrip] = useState<TripRecord | null>(null);
+  const [modifyingTrip, setModifyingTrip] = useState<TripRecord | null>(null);
   const [userReviews, setUserReviews] = useState<Record<number, any>>({});
 
   const loadUserReviews = async () => {
@@ -283,13 +285,23 @@ export default function MyTripsPage() {
                             View stay
                           </Link>
                           {!isCancelled && (
-                            <button
-                              type="button"
-                              onClick={() => setCancellingTripId(trip.id)}
-                              className="text-rose-600 hover:underline cursor-pointer font-medium"
-                            >
-                              Cancel
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setModifyingTrip(trip)}
+                                className="font-semibold text-sky-700 hover:underline cursor-pointer flex items-center gap-1"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Modify</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setCancellingTripId(trip.id)}
+                                className="text-rose-600 hover:underline cursor-pointer font-medium"
+                              >
+                                Cancel
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -381,6 +393,30 @@ export default function MyTripsPage() {
           }}
         />
       )}
+      {/* Modify Booking Modal */}
+      <ModifyBookingModal
+        isOpen={!!modifyingTrip}
+        booking={modifyingTrip}
+        onClose={() => setModifyingTrip(null)}
+        onSuccess={(updated) => {
+          setTrips((prev) =>
+            prev.map((t) =>
+              t.id === updated.id
+                ? {
+                    ...t,
+                    checkIn: updated.check_in || updated.checkIn,
+                    checkOut: updated.check_out || updated.checkOut,
+                    guestsCount: updated.guests_count || updated.guestsCount,
+                    totalPrice: updated.total_price || updated.totalPrice,
+                    status: updated.status || t.status,
+                  }
+                : t
+            )
+          );
+          setModifyingTrip(null);
+        }}
+        userId={persona.id || 1}
+      />
     </div>
   );
 }

@@ -63,6 +63,16 @@ def make_booking(
     booking = create_booking(db=db, guest_id=current_user.id, booking_in=payload)
     return serialize_booking(booking)
 
+from datetime import date
+from typing import Optional
+from pydantic import BaseModel
+
+class BookingUpdate(BaseModel):
+    check_in: Optional[date] = None
+    check_out: Optional[date] = None
+    guests_count: Optional[int] = None
+    status: Optional[str] = None
+
 @router.get("/my-trips", response_model=List[BookingResponse])
 def get_my_trips(
     current_user: User = Depends(get_current_user),
@@ -73,6 +83,47 @@ def get_my_trips(
     ).order_by(Booking.check_in.desc()).all()
     
     return [serialize_booking(b) for b in bookings]
+
+@router.get("/listing/{listing_id}", response_model=List[BookingResponse])
+def get_bookings_for_listing(
+    listing_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    bookings = db.query(Booking).filter(
+        Booking.listing_id == listing_id
+    ).order_by(Booking.check_in.desc()).all()
+    return [serialize_booking(b) for b in bookings]
+
+@router.patch("/{id}", response_model=BookingResponse)
+def update_booking(
+    id: int,
+    payload: BookingUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    booking = db.query(Booking).filter(Booking.id == id).first()
+    if not booking:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found.")
+
+    if payload.check_in is not None:
+        booking.check_in = payload.check_in
+    if payload.check_out is not None:
+        booking.check_out = payload.check_out
+    if payload.guests_count is not None and payload.guests_count > 0:
+        booking.guests_count = payload.guests_count
+    if payload.status is not None:
+        booking.status = payload.status.upper()
+
+    if booking.check_in and booking.check_out:
+        total_nights = (booking.check_out - booking.check_in).days
+        if total_nights > 0:
+            booking.total_nights = total_nights
+            booking.total_price = (booking.nightly_rate * total_nights) + booking.cleaning_fee + booking.service_fee
+
+    db.commit()
+    db.refresh(booking)
+    return serialize_booking(booking)
 
 @router.patch("/{id}/cancel", response_model=BookingResponse)
 def cancel_reservation(
