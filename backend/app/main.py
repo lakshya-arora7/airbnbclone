@@ -54,9 +54,13 @@ app.mount("/static/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="u
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/", tags=["Health"])
+@app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
+@app.get("/api/v1/health", tags=["Health"])
 def root():
     return {
         "status": "healthy",
+        "service": "airbnb-backend",
         "app": settings.PROJECT_NAME,
         "docs_url": "/docs",
         "api_v1": settings.API_V1_STR
