@@ -23,7 +23,13 @@ def get_user_wishlist(
         db.commit()
         db.refresh(wishlist)
 
-    listings = [serialize_listing(item.listing) for item in wishlist.items if item.listing]
+    seen_ids = set()
+    listings = []
+    for item in wishlist.items:
+        if item.listing and item.listing.id not in seen_ids:
+            seen_ids.add(item.listing.id)
+            listings.append(serialize_listing(item.listing))
+
     return {
         "id": wishlist.id,
         "user_id": wishlist.user_id,
@@ -49,13 +55,14 @@ def toggle_wishlist_item(
         db.commit()
         db.refresh(wishlist)
 
-    existing = db.query(WishlistItem).filter(
+    existing_items = db.query(WishlistItem).filter(
         WishlistItem.wishlist_id == wishlist.id,
         WishlistItem.listing_id == listing_id
-    ).first()
+    ).all()
 
-    if existing:
-        db.delete(existing)
+    if existing_items:
+        for item in existing_items:
+            db.delete(item)
         db.commit()
         return {
             "listing_id": listing_id,

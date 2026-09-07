@@ -41,8 +41,9 @@ export default function ListingCard({ listing, isFavorited, onToggleFavorite }: 
     e.stopPropagation();
     if (onToggleFavorite) {
       onToggleFavorite(listing.id);
+    } else {
+      toggleWishlist(listing);
     }
-    toggleWishlist(listing);
   };
 
   // Determine dynamic link

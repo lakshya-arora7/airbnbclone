@@ -41,14 +41,17 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     try {
       const serverListings = await api.getWishlist(currentUserId);
       if (Array.isArray(serverListings)) {
-        // Only actual liked properties from backend database
-        setWishlist(serverListings);
-        const ids = serverListings.map((l) => l.id);
-        setWishlistIds(ids);
+        // Guarantee deduplicated list by id
+        const uniqueMap = new Map<number, Listing>();
+        serverListings.forEach((l) => {
+          if (l && l.id) uniqueMap.set(l.id, l);
+        });
+        const deduplicated = Array.from(uniqueMap.values());
+        setWishlist(deduplicated);
+        setWishlistIds(deduplicated.map((l) => l.id));
 
-        // Cache exclusively the actual liked properties for this user
         try {
-          localStorage.setItem(storageKey, JSON.stringify(serverListings));
+          localStorage.setItem(storageKey, JSON.stringify(deduplicated));
         } catch (e) {
           // ignore
         }
@@ -60,8 +63,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         if (cached) {
           const parsed: Listing[] = JSON.parse(cached);
           if (Array.isArray(parsed)) {
-            setWishlist(parsed);
-            setWishlistIds(parsed.map((l) => l.id));
+            const uniqueMap = new Map<number, Listing>();
+            parsed.forEach((l) => {
+              if (l && l.id) uniqueMap.set(l.id, l);
+            });
+            const deduplicated = Array.from(uniqueMap.values());
+            setWishlist(deduplicated);
+            setWishlistIds(deduplicated.map((l) => l.id));
           }
         } else {
           setWishlist([]);
@@ -81,11 +89,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     loadWishlist();
 
     const handleSync = () => loadWishlist();
-    window.addEventListener("airbnb_wishlist_updated", handleSync);
     window.addEventListener("focus", handleSync);
 
     return () => {
-      window.removeEventListener("airbnb_wishlist_updated", handleSync);
       window.removeEventListener("focus", handleSync);
     };
   }, [loadWishlist]);
@@ -98,35 +104,31 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   );
 
   const toggleWishlist = async (listing: Listing): Promise<boolean> => {
-    const isLiked = wishlistIds.includes(listing.id);
-    const nextState = !isLiked;
+    let nextState = false;
 
-    let updatedWishlist: Listing[];
-    let updatedIds: number[];
+    setWishlist((prev) => {
+      const exists = prev.some((l) => l.id === listing.id);
+      nextState = !exists;
+      let next: Listing[];
+      if (exists) {
+        next = prev.filter((l) => l.id !== listing.id);
+      } else {
+        next = [listing, ...prev.filter((l) => l.id !== listing.id)];
+      }
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
 
-    if (isLiked) {
-      updatedWishlist = wishlist.filter((l) => l.id !== listing.id);
-      updatedIds = wishlistIds.filter((id) => id !== listing.id);
-    } else {
-      updatedWishlist = [listing, ...wishlist.filter((l) => l.id !== listing.id)];
-      updatedIds = [listing.id, ...wishlistIds.filter((id) => id !== listing.id)];
-    }
+    setWishlistIds((prev) => {
+      if (prev.includes(listing.id)) {
+        return prev.filter((id) => id !== listing.id);
+      } else {
+        return [listing.id, ...prev.filter((id) => id !== listing.id)];
+      }
+    });
 
-    // Immediately update UI state
-    setWishlist(updatedWishlist);
-    setWishlistIds(updatedIds);
-
-    // Save actual user likes to local storage
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(updatedWishlist));
-    } catch (e) {
-      console.error(e);
-    }
-
-    // Broadcast change to all listening views
-    window.dispatchEvent(new CustomEvent("airbnb_wishlist_updated"));
-
-    // Sync with backend database
     try {
       await api.toggleWishlist(listing.id, currentUserId);
     } catch (err) {
@@ -137,19 +139,15 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromWishlist = async (id: number): Promise<void> => {
-    const updatedWishlist = wishlist.filter((l) => l.id !== id);
-    const updatedIds = wishlistIds.filter((favId) => favId !== id);
+    setWishlist((prev) => {
+      const next = prev.filter((l) => l.id !== id);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
 
-    setWishlist(updatedWishlist);
-    setWishlistIds(updatedIds);
-
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(updatedWishlist));
-    } catch (e) {
-      console.error(e);
-    }
-
-    window.dispatchEvent(new CustomEvent("airbnb_wishlist_updated"));
+    setWishlistIds((prev) => prev.filter((favId) => favId !== id));
 
     try {
       await api.toggleWishlist(id, currentUserId);

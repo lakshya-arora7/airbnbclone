@@ -1,14 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import Navbar from "@/components/header/Navbar";
 import ListingCard from "@/components/listings/ListingCard";
 import { Heart, Sparkles } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
+import { Listing } from "@/types";
 
 export default function WishlistsPage() {
   const { wishlist, removeFromWishlist, isLoading } = useWishlist();
+
+  // Ensure items are 100% deduplicated by id
+  const uniqueWishlist = useMemo(() => {
+    const map = new Map<number, Listing>();
+    (wishlist || []).forEach((item) => {
+      if (item && item.id) {
+        map.set(item.id, item);
+      }
+    });
+    return Array.from(map.values());
+  }, [wishlist]);
 
   return (
     <div className="min-h-screen bg-white text-[#222222]">
@@ -19,7 +31,7 @@ export default function WishlistsPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-[#222222]">Wishlists</h1>
             <span className="bg-rose-50 text-[#FF385C] border border-rose-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {wishlist.length} saved
+              {uniqueWishlist.length} saved
             </span>
           </div>
           <p className="text-sm text-[#717171] mt-1">
@@ -37,7 +49,7 @@ export default function WishlistsPage() {
               </div>
             ))}
           </div>
-        ) : wishlist.length === 0 ? (
+        ) : uniqueWishlist.length === 0 ? (
           <div className="border border-[#DDDDDD] rounded-3xl p-12 text-center max-w-md mx-auto my-12 bg-[#F7F7F7]">
             <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-4 text-[#FF385C] shadow-sm">
               <Heart className="w-8 h-8" />
@@ -55,9 +67,9 @@ export default function WishlistsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
-            {wishlist.map((listing) => (
+            {uniqueWishlist.map((listing) => (
               <ListingCard
-                key={listing.id}
+                key={`wishlist-listing-${listing.id}`}
                 listing={listing}
                 isFavorited={true}
                 onToggleFavorite={() => removeFromWishlist(listing.id)}
