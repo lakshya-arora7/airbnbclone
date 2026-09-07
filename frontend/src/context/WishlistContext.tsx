@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import { useAuthPersona } from "./AuthPersonaContext";
@@ -22,84 +22,89 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Load wishlist on mount / persona change
+  const currentUserId = persona?.id || 1;
+  const storageKey = `airbnb_liked_wishlist_u${currentUserId}`;
+
+  // Purge legacy mock wishlist keys
   useEffect(() => {
-    let isMounted = true;
-    const currentUserId = persona?.id || 1;
-
-    async function loadWishlist() {
-      setIsLoading(true);
-      let localItems: Listing[] = [];
-      let localIds: number[] = [];
-
-      try {
-        const savedItems = localStorage.getItem("airbnb_demo_wishlist_items");
-        if (savedItems) {
-          localItems = JSON.parse(savedItems);
-        }
-        const savedIds = localStorage.getItem("airbnb_demo_wishlist");
-        if (savedIds) {
-          localIds = JSON.parse(savedIds);
-        }
-      } catch (e) {
-        console.warn("[Wishlist] Error reading localStorage:", e);
-      }
-
-      // Fetch from backend
-      try {
-        const serverListings = await api.getWishlist(currentUserId);
-        if (isMounted) {
-          // Merge server listings with local cached items (avoiding duplicates by id)
-          const mergedMap = new Map<number, Listing>();
-          (serverListings || []).forEach((l) => mergedMap.set(l.id, l));
-          localItems.forEach((l) => {
-            if (!mergedMap.has(l.id) && localIds.includes(l.id)) {
-              mergedMap.set(l.id, l);
-            }
-          });
-
-          const combined = Array.from(mergedMap.values());
-          const ids = combined.map((l) => l.id);
-
-          setWishlist(combined);
-          setWishlistIds(ids);
-
-          localStorage.setItem("airbnb_demo_wishlist", JSON.stringify(ids));
-          localStorage.setItem("airbnb_demo_wishlist_items", JSON.stringify(combined));
-        }
-      } catch (e) {
-        console.warn("[Wishlist] Backend fetch failed, relying on local:", e);
-        if (isMounted && localItems.length > 0) {
-          setWishlist(localItems);
-          setWishlistIds(localIds);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    try {
+      localStorage.removeItem("airbnb_demo_wishlist_items");
+      localStorage.removeItem("airbnb_demo_wishlist");
+    } catch (e) {
+      // ignore
     }
+  }, []);
 
+  // Fetch actual liked properties from backend DB
+  const loadWishlist = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const serverListings = await api.getWishlist(currentUserId);
+      if (Array.isArray(serverListings)) {
+        // Only actual liked properties from backend database
+        setWishlist(serverListings);
+        const ids = serverListings.map((l) => l.id);
+        setWishlistIds(ids);
+
+        // Cache exclusively the actual liked properties for this user
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(serverListings));
+        } catch (e) {
+          // ignore
+        }
+      }
+    } catch (e) {
+      console.warn("[Wishlist] Backend fetch failed, reading actual saved cache:", e);
+      try {
+        const cached = localStorage.getItem(storageKey);
+        if (cached) {
+          const parsed: Listing[] = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            setWishlist(parsed);
+            setWishlistIds(parsed.map((l) => l.id));
+          }
+        } else {
+          setWishlist([]);
+          setWishlistIds([]);
+        }
+      } catch (err) {
+        setWishlist([]);
+        setWishlistIds([]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUserId, storageKey]);
+
+  // Load wishlist when user/persona changes
+  useEffect(() => {
     loadWishlist();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [persona?.id]);
+    const handleSync = () => loadWishlist();
+    window.addEventListener("airbnb_wishlist_updated", handleSync);
+    window.addEventListener("focus", handleSync);
 
-  const isWishlisted = (id: number): boolean => {
-    return wishlistIds.includes(id);
-  };
+    return () => {
+      window.removeEventListener("airbnb_wishlist_updated", handleSync);
+      window.removeEventListener("focus", handleSync);
+    };
+  }, [loadWishlist]);
+
+  const isWishlisted = useCallback(
+    (id: number): boolean => {
+      return wishlistIds.includes(id);
+    },
+    [wishlistIds]
+  );
 
   const toggleWishlist = async (listing: Listing): Promise<boolean> => {
-    const currentUserId = persona?.id || 1;
-    const currentlyFavorited = wishlistIds.includes(listing.id);
-    const nextState = !currentlyFavorited;
+    const isLiked = wishlistIds.includes(listing.id);
+    const nextState = !isLiked;
 
     let updatedWishlist: Listing[];
     let updatedIds: number[];
 
-    if (currentlyFavorited) {
+    if (isLiked) {
       updatedWishlist = wishlist.filter((l) => l.id !== listing.id);
       updatedIds = wishlistIds.filter((id) => id !== listing.id);
     } else {
@@ -107,19 +112,21 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       updatedIds = [listing.id, ...wishlistIds.filter((id) => id !== listing.id)];
     }
 
-    // Immediately update UI state for instant responsiveness
+    // Immediately update UI state
     setWishlist(updatedWishlist);
     setWishlistIds(updatedIds);
 
-    // Save to localStorage
+    // Save actual user likes to local storage
     try {
-      localStorage.setItem("airbnb_demo_wishlist", JSON.stringify(updatedIds));
-      localStorage.setItem("airbnb_demo_wishlist_items", JSON.stringify(updatedWishlist));
+      localStorage.setItem(storageKey, JSON.stringify(updatedWishlist));
     } catch (e) {
       console.error(e);
     }
 
-    // Persist to backend database asynchronously
+    // Broadcast change to all listening views
+    window.dispatchEvent(new CustomEvent("airbnb_wishlist_updated"));
+
+    // Sync with backend database
     try {
       await api.toggleWishlist(listing.id, currentUserId);
     } catch (err) {
@@ -130,7 +137,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromWishlist = async (id: number): Promise<void> => {
-    const currentUserId = persona?.id || 1;
     const updatedWishlist = wishlist.filter((l) => l.id !== id);
     const updatedIds = wishlistIds.filter((favId) => favId !== id);
 
@@ -138,11 +144,12 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     setWishlistIds(updatedIds);
 
     try {
-      localStorage.setItem("airbnb_demo_wishlist", JSON.stringify(updatedIds));
-      localStorage.setItem("airbnb_demo_wishlist_items", JSON.stringify(updatedWishlist));
+      localStorage.setItem(storageKey, JSON.stringify(updatedWishlist));
     } catch (e) {
       console.error(e);
     }
+
+    window.dispatchEvent(new CustomEvent("airbnb_wishlist_updated"));
 
     try {
       await api.toggleWishlist(id, currentUserId);
