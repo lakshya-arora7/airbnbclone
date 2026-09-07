@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
@@ -120,14 +120,29 @@ export default function Home() {
     amenities: []
   });
 
-  useEffect(() => {
-    // Fetch live listings from backend
+  const fetchListings = useCallback(() => {
+    // Fetch live listings from backend + synced local store
     api.getListings().then((data) => {
       if (data) {
         setAllListings(data);
       }
     });
   }, []);
+
+  useEffect(() => {
+    fetchListings();
+
+    const handleUpdate = () => fetchListings();
+    window.addEventListener("airbnb_listings_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    window.addEventListener("focus", handleUpdate);
+
+    return () => {
+      window.removeEventListener("airbnb_listings_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("focus", handleUpdate);
+    };
+  }, [fetchListings]);
 
   // Filter listings based on search parameters and selectedCategory
   const filteredListings = useMemo(() => {

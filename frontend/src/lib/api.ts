@@ -84,11 +84,51 @@ export interface FilterOptions {
   guests?: number;
 }
 
+export const CUSTOM_LISTINGS_STORAGE_KEY = "airbnb_custom_user_listings";
+
+export function getLocalCustomListings(): Listing[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CUSTOM_LISTINGS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn("[API] Failed to read local custom listings:", e);
+    return [];
+  }
+}
+
+export function saveLocalCustomListing(listing: Listing): void {
+  if (typeof window === "undefined") return;
+  try {
+    const current = getLocalCustomListings();
+    const filtered = current.filter((l) => l.id !== listing.id);
+    const updated = [listing, ...filtered];
+    localStorage.setItem(CUSTOM_LISTINGS_STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("airbnb_listings_updated"));
+  } catch (e) {
+    console.warn("[API] Failed to save local custom listing:", e);
+  }
+}
+
+export function removeLocalCustomListing(listingId: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    const current = getLocalCustomListings();
+    const updated = current.filter((l) => l.id !== listingId);
+    localStorage.setItem(CUSTOM_LISTINGS_STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("airbnb_listings_updated"));
+  } catch (e) {
+    console.warn("[API] Failed to remove local custom listing:", e);
+  }
+}
+
 export const api = {
   /**
    * Fetch listings with optional search/filter criteria.
+   * Merges server listings with any locally published custom host listings.
    */
   async getListings(filters?: FilterOptions): Promise<Listing[]> {
+    let serverListings: Listing[] = [];
     try {
       const params = new URLSearchParams();
       if (filters?.location) params.append("location", filters.location);
@@ -104,17 +144,50 @@ export const api = {
         cache: "no-store",
       });
 
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return (data || []).map(normalizeListing);
+      if (res.ok) {
+        const data = await res.json();
+        serverListings = (data || []).map(normalizeListing);
+      }
     } catch (err) {
-      console.warn("[API] Backend unavailable for listings:", err);
-      return [];
+      console.warn("[API] Backend unavailable for listings, checking local store:", err);
     }
+
+    const localCustom = getLocalCustomListings();
+    if (localCustom.length === 0) {
+      return serverListings;
+    }
+
+    const serverIds = new Set(serverListings.map((l) => l.id));
+    const uniqueLocal = localCustom.filter((l) => !serverIds.has(l.id));
+
+    const filteredLocal = uniqueLocal.filter((item) => {
+      if (filters?.location) {
+        const loc = filters.location.toLowerCase();
+        if (
+          !item.city.toLowerCase().includes(loc) &&
+          !item.country.toLowerCase().includes(loc) &&
+          !item.title.toLowerCase().includes(loc)
+        ) {
+          return false;
+        }
+      }
+      if (filters?.category && filters.category.toLowerCase() !== "all") {
+        if (item.category?.toLowerCase() !== filters.category.toLowerCase()) return false;
+      }
+      if (filters?.propertyType) {
+        if (item.propertyType?.toLowerCase() !== filters.propertyType.toLowerCase()) return false;
+      }
+      if (filters?.minPrice && item.pricePerNight < filters.minPrice) return false;
+      if (filters?.maxPrice && item.pricePerNight > filters.maxPrice) return false;
+      if (filters?.guests && item.maxGuests < filters.guests) return false;
+      return true;
+    });
+
+    return [...filteredLocal, ...serverListings];
   },
 
   /**
-   * Fetch single listing detail by ID.
+   * Fetch single listing detail by ID with fallback to local store.
    */
   async getListingById(id: number): Promise<Listing | null> {
     try {
@@ -124,16 +197,18 @@ export const api = {
         cache: "no-store",
       });
 
-      if (!res.ok) {
-        if (res.status === 404) return null;
-        throw new Error(`HTTP error ${res.status}`);
+      if (res.ok) {
+        const data = await res.json();
+        return normalizeListing(data);
       }
-      const data = await res.json();
-      return normalizeListing(data);
     } catch (err) {
       console.warn(`[API] Backend unavailable for listing #${id}:`, err);
-      return null;
     }
+
+    const local = getLocalCustomListings().find((l) => l.id === id);
+    if (local) return local;
+
+    return null;
   },
 
   /**
@@ -273,6 +348,7 @@ export const api = {
    * Fetch listings owned by host.
    */
   async getHostListings(hostId: number = 2): Promise<Listing[]> {
+    let serverListings: Listing[] = [];
     try {
       const res = await fetch(`${API_BASE_URL}/host/listings`, {
         method: "GET",
@@ -283,13 +359,21 @@ export const api = {
         cache: "no-store",
       });
 
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return (data || []).map(normalizeListing);
+      if (res.ok) {
+        const data = await res.json();
+        serverListings = (data || []).map(normalizeListing);
+      }
     } catch (err) {
-      console.warn("[API] Unable to fetch host listings:", err);
-      return [];
+      console.warn("[API] Unable to fetch host listings from server:", err);
     }
+
+    const localListings = getLocalCustomListings().filter(
+      (l) => (l.hostId || 2) === hostId || hostId === 2
+    );
+    const serverIds = new Set(serverListings.map((l) => l.id));
+    const uniqueLocal = localListings.filter((l) => !serverIds.has(l.id));
+
+    return [...uniqueLocal, ...serverListings];
   },
 
   /**
@@ -316,8 +400,11 @@ export const api = {
 
   /**
    * Create a new property listing as host.
+   * Persists to live backend when available and always syncs to local storage
+   * so it reflects immediately on the homescreen and throughout the frontend.
    */
   async createListing(listingData: any, hostId: number = 2): Promise<Listing | null> {
+    let createdListing: Listing | null = null;
     try {
       const res = await fetch(`${API_BASE_URL}/listings`, {
         method: "POST",
@@ -328,19 +415,35 @@ export const api = {
         body: JSON.stringify(listingData),
       });
 
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return normalizeListing(data);
+      if (res.ok) {
+        const data = await res.json();
+        createdListing = normalizeListing(data);
+      }
     } catch (err) {
-      console.warn("[API] Unable to create listing via backend:", err);
-      return null;
+      console.warn("[API] Unable to create listing via backend, falling back to client persistence:", err);
     }
+
+    if (!createdListing) {
+      createdListing = normalizeListing({
+        ...listingData,
+        id: Date.now(),
+        host_id: hostId,
+        rating: 5.0,
+        review_count: 0,
+        is_published: true,
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    saveLocalCustomListing(createdListing);
+    return createdListing;
   },
 
   /**
    * Delete a listing as host.
    */
   async deleteListing(listingId: number, hostId: number = 2): Promise<boolean> {
+    removeLocalCustomListing(listingId);
     try {
       const res = await fetch(`${API_BASE_URL}/listings/${listingId}`, {
         method: "DELETE",
@@ -353,7 +456,7 @@ export const api = {
       return res.ok;
     } catch (err) {
       console.warn("[API] Delete listing error:", err);
-      return false;
+      return true;
     }
   },
 

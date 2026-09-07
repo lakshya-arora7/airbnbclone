@@ -222,42 +222,11 @@ export default function CreateListingModal({
         })),
       };
 
-      const serverListing = await api.createListing(payload, hostId || 2);
+      const createdListing = await api.createListing(payload, hostId || 2);
 
-      const newListing: Listing = serverListing || {
-        id: Date.now(),
-        title: payload.title,
-        subtitle: payload.subtitle,
-        description: payload.description,
-        propertyType: payload.property_type,
-        category: payload.category,
-        city: payload.city,
-        country: payload.country,
-        latitude: payload.latitude,
-        longitude: payload.longitude,
-        pricePerNight: payload.price_per_night,
-        cleaningFee: payload.cleaning_fee,
-        serviceFeePercent: 14,
-        rating: 5.0,
-        reviewCount: 0,
-        maxGuests: payload.max_guests,
-        bedrooms: payload.bedrooms,
-        beds: payload.beds,
-        bathrooms: payload.bathrooms,
-        bedDetails: payload.bed_details,
-        amenities: payload.amenities,
-        images: payload.images.map((img, i) => ({
-          id: i + 1,
-          url: img.url,
-          displayOrder: img.display_order,
-          isPrimary: img.is_primary,
-        })),
-        hostId: hostId || 2,
-        isPublished: true,
-        createdAt: new Date().toISOString(),
-      };
-
-      onSuccess(newListing);
+      if (createdListing) {
+        onSuccess(createdListing);
+      }
       onClose();
     } catch (err: any) {
       console.error("Listing creation failed:", err);

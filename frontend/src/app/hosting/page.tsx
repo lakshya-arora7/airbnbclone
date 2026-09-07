@@ -138,14 +138,17 @@ export default function HostDashboardPage() {
       switchToHosting();
     }
     const hostIdToQuery = persona.id === 2 ? 2 : (persona.id || 2);
-    // Clear any stale demo host listings in browser localStorage
-    try {
-      localStorage.removeItem("airbnb_demo_host_listings");
-    } catch {}
 
-    api.getHostListings(hostIdToQuery).then((liveListings) => {
-      setUserListings(liveListings || []);
-    });
+    const loadHostData = () => {
+      api.getHostListings(hostIdToQuery).then((liveListings) => {
+        setUserListings(liveListings || []);
+      });
+    };
+
+    loadHostData();
+
+    const handleUpdate = () => loadHostData();
+    window.addEventListener("airbnb_listings_updated", handleUpdate);
 
     api.getHostReservations(hostIdToQuery).then((resList) => {
       const reservations = resList || [];
@@ -199,6 +202,10 @@ export default function HostDashboardPage() {
         setActiveThreadId(null);
       }
     });
+
+    return () => {
+      window.removeEventListener("airbnb_listings_updated", handleUpdate);
+    };
   }, [persona.id, persona.role, switchToHosting]);
 
   const handleSwitchToTravelling = () => {
