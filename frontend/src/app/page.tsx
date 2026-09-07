@@ -16,7 +16,8 @@ import {
   ArrowRight,
   Map as MapIcon,
   List,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Globe as GlobeIcon
 } from "lucide-react";
 
 // Dynamically import Leaflet Map with SSR disabled
@@ -241,7 +242,10 @@ export default function Home() {
               </div>
 
               {mapListings.length === 0 ? (
-                <div className="py-20 text-center text-[#717171] bg-[#FAFAFA] rounded-2xl p-6">
+                <div className="py-16 text-center text-[#717171] bg-[#FAFAFA] rounded-2xl p-6 flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-[#FFF0F3] flex items-center justify-center text-[#FF385C] mb-3 border border-rose-100 shadow-xs">
+                    <HomeIcon className="w-7 h-7 text-[#FF385C]" />
+                  </div>
                   <p className="font-semibold text-[#222222]">No homes on the map</p>
                   <p className="text-xs mt-1">When hosts publish listings, they will appear here live with map pins.</p>
                 </div>
@@ -291,12 +295,8 @@ export default function Home() {
               <>
                 {filteredListings.length === 0 ? (
                   <div className="py-20 flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
-                    <div className="w-44 h-44 flex items-center justify-center">
-                      <img
-                        src="/images/host-notebook.jpg"
-                        alt="No listings found"
-                        className="w-full h-full object-contain opacity-85"
-                      />
+                    <div className="w-20 h-20 rounded-3xl bg-[#FFF0F3] flex items-center justify-center text-[#FF385C] border border-rose-100 shadow-sm mb-1">
+                      <HomeIcon className="w-10 h-10 text-[#FF385C] stroke-[1.8]" />
                     </div>
                     <h2 className="text-2xl font-bold text-[#222222]">
                       {allListings.length === 0 ? "No homes listed yet" : "No matching stays found"}
@@ -321,7 +321,7 @@ export default function Home() {
                       )}
                       <Link
                         href="/hosting"
-                        className="px-5 py-2.5 bg-[#222222] text-white text-xs font-bold rounded-xl hover:bg-black transition shadow-xs flex items-center gap-2 cursor-pointer"
+                        className="px-5 py-2.5 bg-[#FF385C] hover:bg-[#E00B41] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer"
                       >
                         <HomeIcon className="w-3.5 h-3.5" />
                         <span>Host your home</span>
@@ -343,12 +343,8 @@ export default function Home() {
               <>
                 {liveExperiences.length === 0 ? (
                   <div className="py-20 flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
-                    <div className="w-44 h-44 flex items-center justify-center">
-                      <img
-                        src="/images/host-notebook.jpg"
-                        alt="No experiences listed"
-                        className="w-full h-full object-contain opacity-85"
-                      />
+                    <div className="w-20 h-20 rounded-3xl bg-[#FFF0F3] flex items-center justify-center text-[#FF385C] border border-rose-100 shadow-sm mb-1">
+                      <Sparkles className="w-10 h-10 text-[#FF385C] stroke-[1.8]" />
                     </div>
                     <h2 className="text-2xl font-bold text-[#222222]">No experiences listed yet</h2>
                     <p className="text-xs text-[#717171] leading-relaxed">
@@ -356,7 +352,7 @@ export default function Home() {
                     </p>
                     <Link
                       href="/hosting"
-                      className="px-5 py-2.5 bg-[#222222] text-white text-xs font-bold rounded-xl hover:bg-black transition shadow-xs flex items-center gap-2 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#FF385C] hover:bg-[#E00B41] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Host an experience</span>
@@ -377,12 +373,8 @@ export default function Home() {
               <>
                 {filteredListings.length === 0 && liveExperiences.length === 0 ? (
                   <div className="py-20 flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
-                    <div className="w-44 h-44 flex items-center justify-center">
-                      <img
-                        src="/images/host-notebook.jpg"
-                        alt="No listings found"
-                        className="w-full h-full object-contain opacity-85"
-                      />
+                    <div className="w-20 h-20 rounded-3xl bg-[#FFF0F3] flex items-center justify-center text-[#FF385C] border border-rose-100 shadow-sm mb-1">
+                      <GlobeIcon className="w-10 h-10 text-[#FF385C] stroke-[1.8]" />
                     </div>
                     <h2 className="text-2xl font-bold text-[#222222]">No listings published yet</h2>
                     <p className="text-xs text-[#717171] leading-relaxed">
@@ -390,7 +382,7 @@ export default function Home() {
                     </p>
                     <Link
                       href="/hosting"
-                      className="px-5 py-2.5 bg-[#222222] text-white text-xs font-bold rounded-xl hover:bg-black transition shadow-xs flex items-center gap-2 cursor-pointer"
+                      className="px-5 py-2.5 bg-[#FF385C] hover:bg-[#E00B41] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-2 cursor-pointer"
                     >
                       <HomeIcon className="w-3.5 h-3.5" />
                       <span>Host a stay</span>

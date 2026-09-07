@@ -17,7 +17,8 @@ import {
   Bell,
   Settings,
   LogOut,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Sparkles
 } from "lucide-react";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
@@ -152,60 +153,66 @@ export default function Navbar({
           </Link>
         </div>
 
-        {/* Column 2 (Center): The 3 Mode Switchers - 100% Mathematically Centered */}
+        {/* Column 2 (Center): The 3 Mode Switchers - Simple Pink Icons */}
         <div className="flex items-center justify-center">
-          <nav className="flex items-center gap-6 sm:gap-10 h-full">
-            {/* All: Globe on brass stand */}
+          <nav className="flex items-center gap-4 sm:gap-8 h-full">
+            {/* All: Simple Pink Globe */}
             <button
               onClick={() => onSelectMode?.("all")}
-              className={`flex items-center gap-2.5 h-full relative transition-all group py-2 cursor-pointer ${
-                activeMode === "all" ? "text-[#222222]" : "text-[#717171] hover:text-[#222222]"
+              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+                activeMode === "all" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className="group-hover:scale-105 transition-transform flex-shrink-0">
-                <AllGlobeIcon className="w-8 h-8 sm:w-9 sm:h-9" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
+                activeMode === "all" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              }`}>
+                <Globe className="w-4 h-4" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "all" ? "font-bold text-[#222222]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.all", "All")}
               </span>
               {activeMode === "all" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#222222] rounded-full" />
+                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
               )}
             </button>
 
-            {/* Homes: House with tree */}
+            {/* Homes: Simple Pink House */}
             <button
               onClick={() => onSelectMode?.("homes")}
-              className={`flex items-center gap-2.5 h-full relative transition-all group py-2 cursor-pointer ${
-                activeMode === "homes" ? "text-[#222222]" : "text-[#717171] hover:text-[#222222]"
+              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+                activeMode === "homes" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className="group-hover:scale-105 transition-transform flex-shrink-0">
-                <HomesHouseIcon className="w-8 h-8 sm:w-9 sm:h-9" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
+                activeMode === "homes" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              }`}>
+                <Home className="w-4 h-4" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "homes" ? "font-bold text-[#222222]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.homes", "Homes")}
               </span>
               {activeMode === "homes" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#222222] rounded-full" />
+                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
               )}
             </button>
 
-            {/* Experiences: Striped balloon */}
+            {/* Experiences: Simple Pink Sparkles */}
             <button
               onClick={() => onSelectMode?.("experiences")}
-              className={`flex items-center gap-2.5 h-full relative transition-all group py-2 cursor-pointer ${
-                activeMode === "experiences" ? "text-[#222222]" : "text-[#717171] hover:text-[#222222]"
+              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+                activeMode === "experiences" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className="group-hover:scale-105 transition-transform flex-shrink-0">
-                <ExperiencesBalloonIcon className="w-8 h-8 sm:w-9 sm:h-9" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
+                activeMode === "experiences" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              }`}>
+                <Sparkles className="w-4 h-4" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "experiences" ? "font-bold text-[#222222]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.experiences", "Experiences")}
               </span>
               {activeMode === "experiences" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#222222] rounded-full" />
+                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
               )}
             </button>
           </nav>
@@ -215,32 +222,32 @@ export default function Navbar({
         <div className="flex items-center justify-end gap-2 relative" ref={menuRef}>
           <button
             onClick={handleToggleHostRole}
-            className="text-sm font-semibold text-[#222222] hover:bg-[#F7F7F7] px-3.5 py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
+            className="text-sm font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-3.5 py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
           >
             {isHost ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
           </button>
 
-          {/* Globe Icon for Language & Currency */}
+          {/* Simple Pink Globe Icon for Language & Currency */}
           <button
             onClick={openLanguageModal}
-            className="p-2.5 rounded-full hover:bg-[#F7F7F7] text-[#222222] transition cursor-pointer flex-shrink-0"
+            className="p-2.5 rounded-full hover:bg-[#FFF0F3] text-[#FF385C] transition cursor-pointer flex-shrink-0"
             aria-label="Choose a language and currency"
           >
-            <Globe className="w-4 h-4" />
+            <Globe className="w-4 h-4 text-[#FF385C]" />
           </button>
 
-          {/* Authentic Airbnb User Menu Capsule Button */}
+          {/* Authentic Airbnb User Menu Capsule Button with Pink Accents */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex items-center gap-2.5 border border-[#DDDDDD] hover:shadow-md transition bg-white pl-3.5 pr-2 py-1.5 rounded-full cursor-pointer relative"
+            className="flex items-center gap-2.5 border border-[#DDDDDD] hover:border-[#FF385C] hover:shadow-md transition bg-white pl-3.5 pr-2 py-1.5 rounded-full cursor-pointer relative"
             aria-label="Main menu"
           >
-            <Menu className="w-4 h-4 text-[#222222]" />
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] flex items-center justify-center relative">
+            <Menu className="w-4 h-4 text-[#FF385C]" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#FFF0F3] flex items-center justify-center relative">
               {persona.avatarUrl ? (
                 <img src={persona.avatarUrl} alt={persona.fullName} className="w-full h-full object-cover" />
               ) : (
-                <User className="w-4 h-4 text-[#717171]" />
+                <User className="w-4 h-4 text-[#FF385C]" />
               )}
             </div>
             {/* Role indicator badge */}
