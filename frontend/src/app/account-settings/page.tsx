@@ -724,7 +724,7 @@ export default function AccountSettingsPage() {
                         </div>
                         {expandedPayoutHelp === "when" && (
                           <div className="pb-3 text-xs text-[#717171] leading-relaxed animate-in fade-in duration-150">
-                            Payouts are typically released approximately 24 hours after your guest's scheduled check-in time. Depending on your bank's processing schedule, funds are deposited within 1 to 2 business days.
+                            Payouts are typically released approximately 24 hours after your guest&apos;s scheduled check-in time. Depending on your bank&apos;s processing schedule, funds are deposited within 1 to 2 business days.
                           </div>
                         )}
                       </div>

@@ -39,18 +39,18 @@ export default function ExperienceDetailPage({ params }: PageProps) {
   // Find experience
   const experience: Listing | undefined = getCategoryListingById(expId);
 
+  // Booking widget state
+  const [selectedDate, setSelectedDate] = useState<string>("2026-09-08");
+  const [selectedTime, setSelectedTime] = useState<string>(experience?.timeSlot || "11:45 pm");
+  const [guestsCount, setGuestsCount] = useState<number>(2);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+  const [isShareCopied, setIsShareCopied] = useState<boolean>(false);
+
   if (!experience) {
     return notFound();
   }
 
   const isFavorited = isWishlisted(experience.id);
-
-  // Booking widget state
-  const [selectedDate, setSelectedDate] = useState<string>("2026-09-08");
-  const [selectedTime, setSelectedTime] = useState<string>(experience.timeSlot || "11:45 pm");
-  const [guestsCount, setGuestsCount] = useState<number>(2);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
-  const [isShareCopied, setIsShareCopied] = useState<boolean>(false);
 
   const pricePerGuest = experience.pricePerNight || 1500;
   const baseTotal = pricePerGuest * guestsCount;
@@ -242,7 +242,7 @@ export default function ExperienceDetailPage({ params }: PageProps) {
                     "Clay-pot Masala Chai & Jalebi tasting",
                     "Bottled mineral water",
                     "Certified heritage storytelling guide",
-                  ]).map((item, idx) => (
+                  ]).map((item: string, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-[#222222]">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                       <span>{item}</span>

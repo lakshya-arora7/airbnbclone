@@ -131,7 +131,7 @@ export default function Footer() {
                         Airbnb is built on welcoming anyone, anywhere. Every member of our community agrees to treat fellow members with respect and without bias, regardless of race, religion, national origin, ethnicity, disability, sex, or sexual orientation.
                       </p>
                       <div className="p-4 bg-white border border-[#DDDDDD] rounded-xl text-xs text-[#222222] font-medium">
-                        "We commit to working together to build a world where anyone can belong anywhere."
+                        &ldquo;We commit to working together to build a world where anyone can belong anywhere.&rdquo;
                       </div>
                     </div>
                   )

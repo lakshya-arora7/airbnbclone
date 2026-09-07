@@ -39,18 +39,18 @@ export default function ServiceDetailPage({ params }: PageProps) {
     SERVICES_LISTINGS.find((s) => s.id === srvId) ||
     SERVICES_LISTINGS[0];
 
-  if (!service) {
-    return notFound();
-  }
-
-  const isFavorited = isWishlisted(service.id);
-
   // Service Booking state
   const [selectedDate, setSelectedDate] = useState<string>("2026-09-08");
   const [selectedSlot, setSelectedSlot] = useState<string>("Lunch (1:00 PM)");
   const [guestsCount, setGuestsCount] = useState<number>(4);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [isShareCopied, setIsShareCopied] = useState<boolean>(false);
+
+  if (!service) {
+    return notFound();
+  }
+
+  const isFavorited = isWishlisted(service.id);
 
   const pricePerUnit = service.pricePerNight || 2400;
   const baseTotal = pricePerUnit;

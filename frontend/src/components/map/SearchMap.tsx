@@ -27,9 +27,12 @@ export default function SearchMap({
 
   // Keep callbacks stable in refs to avoid recreating markers on callback identity changes
   const onSelectRef = useRef(onSelectListing);
-  onSelectRef.current = onSelectListing;
   const onHoverRef = useRef(onHoverListing);
-  onHoverRef.current = onHoverListing;
+
+  useEffect(() => {
+    onSelectRef.current = onSelectListing;
+    onHoverRef.current = onHoverListing;
+  }, [onSelectListing, onHoverListing]);
 
   // Initialize Leaflet Map
   useEffect(() => {
