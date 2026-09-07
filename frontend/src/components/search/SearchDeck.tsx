@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Search, Plus, Minus, ChevronLeft, ChevronRight, X } from "lucide-react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Search, Plus, Minus, ChevronLeft, ChevronRight, X, MapPin, Building2, Landmark, Mountain, Trees, Waves, Sparkles } from "lucide-react";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
+import { searchIndianCities, IndianCity } from "@/data/indianCities";
 
 export interface SearchState {
   location: string;
@@ -200,6 +201,50 @@ export default function SearchDeck({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
+
+  // Dynamically match Indian cities based on initial letters resembling the place
+  const matchedIndianCities = useMemo(() => {
+    return searchIndianCities(location, 12);
+  }, [location]);
+
+  const getCityIcon = (city: IndianCity) => {
+    const t = city.type.toLowerCase();
+    if (t.includes("hill") || t.includes("mountain") || t.includes("snow") || t.includes("valley")) {
+      return <Mountain className="w-5 h-5 text-sky-600" />;
+    }
+    if (t.includes("beach") || t.includes("coast") || t.includes("island") || t.includes("sea")) {
+      return <Waves className="w-5 h-5 text-teal-600" />;
+    }
+    if (t.includes("spiritual") || t.includes("heritage") || t.includes("temple") || t.includes("palace") || t.includes("wonder")) {
+      return <Landmark className="w-5 h-5 text-amber-600" />;
+    }
+    if (t.includes("wildlife") || t.includes("forest") || t.includes("nature") || t.includes("tea") || t.includes("garden")) {
+      return <Trees className="w-5 h-5 text-emerald-600" />;
+    }
+    if (t.includes("tech") || t.includes("capital") || t.includes("metropolis") || t.includes("city")) {
+      return <Building2 className="w-5 h-5 text-[#FF385C]" />;
+    }
+    return <MapPin className="w-5 h-5 text-[#FF385C]" />;
+  };
+
+  const renderHighlightedCityName = (cityName: string, query: string) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return <span>{cityName}</span>;
+
+    const lower = cityName.toLowerCase();
+    const idx = lower.indexOf(q);
+    if (idx === -1) return <span>{cityName}</span>;
+
+    return (
+      <span>
+        {cityName.substring(0, idx)}
+        <span className="font-extrabold text-[#FF385C] underline underline-offset-2">
+          {cityName.substring(idx, idx + q.length)}
+        </span>
+        {cityName.substring(idx + q.length)}
+      </span>
+    );
+  };
 
   // Focus location input when tab becomes 'where'
   useEffect(() => {
@@ -424,65 +469,121 @@ export default function SearchDeck({
                   : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
               }`}
             >
-              {/* Recent searches header & card */}
-              <div className="mb-5">
-                <p className="text-xs font-bold text-[#222222] mb-3">Recent searches</p>
-                <div
-                  onClick={() => {
-                    setLocation("Noida");
-                    setStartDate("2026-09-08");
-                    setEndDate("2026-09-09");
-                    setAdults(4);
-                    onOpenTab("when");
-                  }}
-                  className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#FFE4E8] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    {/* Architectural Building & Forest Icon */}
-                    <svg className="w-6 h-6 text-[#FF385C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <rect x="4" y="6" width="9" height="15" rx="1" />
-                      <line x1="7" y1="10" x2="7.01" y2="10" strokeWidth="2.5" />
-                      <line x1="10" y1="10" x2="10.01" y2="10" strokeWidth="2.5" />
-                      <line x1="7" y1="14" x2="7.01" y2="14" strokeWidth="2.5" />
-                      <line x1="10" y1="14" x2="10.01" y2="14" strokeWidth="2.5" />
-                      <path d="M17 12L19 9L21 12" />
-                      <path d="M16 16L19 12L22 16" />
-                      <line x1="19" y1="16" x2="19" y2="21" />
-                    </svg>
-                  </div>
+              {/* Dynamic Where Content: Autocomplete across all cities in India */}
+              {!location.trim() ? (
+                <div className="space-y-5">
+                  {/* Recent searches header & card */}
                   <div>
-                    <h5 className="font-bold text-sm text-[#222222]">Noida</h5>
-                    <p className="text-xs text-[#717171] mt-0.5">8–9 Sept · 4 guests</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Suggested destinations header & list */}
-              <div>
-                <p className="text-xs font-bold text-[#222222] mb-3">Suggested destinations</p>
-                <div className="space-y-1">
-                  {SUGGESTED_DESTINATIONS.map((dest) => (
+                    <p className="text-xs font-bold text-[#222222] mb-3">Recent searches</p>
                     <div
-                      key={dest.id}
                       onClick={() => {
-                        setLocation(dest.locationValue);
+                        setLocation("Noida");
+                        setStartDate("2026-09-08");
+                        setEndDate("2026-09-09");
+                        setAdults(4);
                         onOpenTab("when");
                       }}
                       className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
                     >
-                      <div
-                        className={`w-12 h-12 rounded-2xl ${dest.badgeBg} border flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
-                      >
-                        {dest.icon}
+                      <div className="w-11 h-11 rounded-2xl bg-[#FFF0F3] border border-[#FFE4E8] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <Building2 className="w-5 h-5 text-[#FF385C]" />
                       </div>
-                      <div className="min-w-0">
-                        <h5 className="font-bold text-sm text-[#222222] truncate">{dest.title}</h5>
-                        <p className="text-xs text-[#717171] mt-0.5 truncate">{dest.subtitle}</p>
+                      <div>
+                        <h5 className="font-bold text-sm text-[#222222]">Noida, Uttar Pradesh</h5>
+                        <p className="text-xs text-[#717171] mt-0.5">8–9 Sept · 4 guests</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Popular destinations in India */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-[#222222]">Popular destinations in India</p>
+                      <span className="text-[11px] text-[#717171]">Explore places</span>
+                    </div>
+                    <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
+                      {matchedIndianCities.map((city) => (
+                        <div
+                          key={city.id}
+                          onClick={() => {
+                            setLocation(city.name);
+                            onOpenTab("when");
+                          }}
+                          className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
+                        >
+                          <div className="w-11 h-11 rounded-2xl bg-[#F7F7F7] border border-[#EBEBEB] flex items-center justify-center flex-shrink-0 group-hover:scale-105 group-hover:bg-[#FFF0F3] group-hover:border-[#FFE4E8] transition-all">
+                            {getCityIcon(city)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-bold text-sm text-[#222222] truncate">
+                              {city.name}, {city.state}
+                            </h5>
+                            <p className="text-xs text-[#717171] mt-0.5 truncate">
+                              {city.type} · India
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#EBEBEB]">
+                    <p className="text-xs font-bold text-[#222222] flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#FF385C]" />
+                      <span>Cities in India matching &ldquo;{location}&rdquo;</span>
+                    </p>
+                    <span className="text-[11px] font-semibold text-[#717171]">
+                      {matchedIndianCities.length} {matchedIndianCities.length === 1 ? "city" : "cities"} found
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 max-h-[380px] overflow-y-auto pr-1">
+                    {matchedIndianCities.length > 0 ? (
+                      matchedIndianCities.map((city) => (
+                        <div
+                          key={city.id}
+                          onClick={() => {
+                            setLocation(city.name);
+                            onOpenTab("when");
+                          }}
+                          className="flex items-center gap-3.5 p-2.5 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
+                        >
+                          <div className="w-11 h-11 rounded-2xl bg-[#FFF0F3] border border-[#FFE4E8] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                            {getCityIcon(city)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-bold text-sm text-[#222222] truncate">
+                              {renderHighlightedCityName(city.name, location)}, {city.state}
+                            </h5>
+                            <p className="text-xs text-[#717171] mt-0.5 truncate">
+                              {city.type} · India
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div
+                        onClick={() => {
+                          onOpenTab("when");
+                        }}
+                        className="p-4 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition text-left"
+                      >
+                        <div className="flex items-center gap-3 mb-1">
+                          <MapPin className="w-5 h-5 text-[#FF385C]" />
+                          <h5 className="font-bold text-sm text-[#222222]">
+                            Search for &ldquo;{location}&rdquo; anywhere in India
+                          </h5>
+                        </div>
+                        <p className="text-xs text-[#717171] pl-8">
+                          Browse all available stays and listings in India
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 2. WHEN POPOVER (Matches Screenshot 1: Centered under Capsule) */}

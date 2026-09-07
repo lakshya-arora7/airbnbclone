@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Search, MapPin, Calendar, Users, Plus, Minus } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { X, Search, MapPin, Calendar, Users, Plus, Minus, Building2 } from "lucide-react";
+import { searchIndianCities } from "@/data/indianCities";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -27,6 +28,10 @@ export default function SearchModal({ isOpen, onClose, onSearch, initialParams }
   const [adults, setAdults] = useState(initialParams?.guests || 1);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
+
+  const matchedCities = useMemo(() => {
+    return searchIndianCities(location, 9);
+  }, [location]);
 
   if (!isOpen) return null;
 
@@ -108,7 +113,7 @@ export default function SearchModal({ isOpen, onClose, onSearch, initialParams }
                 <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#717171]" />
                 <input
                   type="text"
-                  placeholder="Search destinations (e.g. Paris, Bali, Kyoto, New Delhi)"
+                  placeholder="Search Indian cities (e.g. Mumbai, Delhi, Bengaluru, Goa, Jaipur)"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border border-[#DDDDDD] focus:border-[#222222] focus:outline-none text-sm font-medium text-[#222222]"
@@ -116,21 +121,31 @@ export default function SearchModal({ isOpen, onClose, onSearch, initialParams }
                 />
               </div>
 
-              <p className="text-xs font-semibold text-[#717171] mb-3">Popular suggestions</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {POPULAR_DESTINATIONS.map((dest) => (
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-[#717171]">
+                  {location.trim() ? `Cities in India matching "${location}"` : "Popular destinations in India"}
+                </p>
+                <span className="text-[11px] text-[#717171]">{matchedCities.length} places</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[280px] overflow-y-auto pr-1">
+                {matchedCities.map((city) => (
                   <button
-                    key={dest.name}
+                    key={city.id}
                     onClick={() => {
-                      setLocation(dest.name);
+                      setLocation(city.name);
                       setActiveTab("when");
                     }}
-                    className="p-3 text-left border border-[#DDDDDD] rounded-xl hover:border-[#222222] hover:bg-[#F7F7F7] transition group"
+                    className="p-3 text-left border border-[#DDDDDD] rounded-xl hover:border-[#222222] hover:bg-[#F7F7F7] transition group flex items-start gap-2.5 cursor-pointer"
                   >
-                    <p className="text-sm font-semibold text-[#222222] group-hover:text-[#FF385C] transition">
-                      {dest.name}
-                    </p>
-                    <p className="text-xs text-[#717171]">{dest.country}</p>
+                    <Building2 className="w-4 h-4 text-[#FF385C] mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-[#222222] group-hover:text-[#FF385C] transition truncate">
+                        {city.name}
+                      </p>
+                      <p className="text-xs text-[#717171] truncate">{city.state}, India</p>
+                      <p className="text-[10px] text-gray-400 truncate">{city.type}</p>
+                    </div>
                   </button>
                 ))}
               </div>
