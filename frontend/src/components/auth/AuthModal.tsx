@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, CheckCircle2, User, Home, Sparkles, Luggage, ShieldCheck, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, CheckCircle2, Luggage, Home, Sparkles, Check } from "lucide-react";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { UserRole } from "@/types";
 
@@ -18,13 +18,20 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedRole(initialRole);
+      setLoginInput(initialRole === "HOST" ? "ravi.sharma@gmail.com" : "lakshya@gmail.com");
+    }
+  }, [isOpen, initialRole]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const inputVal = loginInput.trim() || (selectedRole === "HOST" ? "ravi.host@airbnb.demo" : "lakshya.guest@airbnb.demo");
+    const inputVal = loginInput.trim() || (selectedRole === "HOST" ? "ravi.sharma@gmail.com" : "lakshya@gmail.com");
     const isSuccess = await login(inputVal, selectedRole);
 
     setIsSubmitting(false);
@@ -37,7 +44,7 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 1200);
+      }, 1000);
     }
   };
 
@@ -45,119 +52,98 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
     setIsSubmitting(true);
     await selectPersona(p);
     setIsSubmitting(false);
-    setSuccessMessage(`Welcome back, ${p.fullName}! Active role: ${p.role}`);
+    setSuccessMessage(`Logged in as ${p.fullName} (${p.role})`);
     setTimeout(() => {
       setSuccessMessage(null);
       onClose();
-    }, 1100);
+    }, 1000);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/55 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[540px] bg-white rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.22)] border border-[#DDDDDD] p-6 sm:p-8 max-h-[92vh] overflow-y-auto">
-        {/* Close Button */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-[420px] bg-white rounded-[32px] shadow-[0_16px_48px_rgba(0,0,0,0.2)] border border-gray-100 p-7 sm:p-8 max-h-[92vh] overflow-y-auto">
+        {/* Close Button at top-right */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F7F7F7] text-[#222222] transition cursor-pointer"
+          className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 text-[#222222] transition cursor-pointer"
           aria-label="Close modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {successMessage ? (
-          <div className="py-12 text-center space-y-4 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-10 h-10" />
+          <div className="py-10 text-center space-y-3 animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-extrabold text-[#222222]">{successMessage}</h3>
-            <p className="text-sm text-[#717171]">
-              Switching your session and loading your profile...
+            <h3 className="text-xl font-extrabold text-[#222222]">{successMessage}</h3>
+            <p className="text-xs text-[#717171]">
+              Switching your role and personal dashboard...
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Brand Title */}
-            <div className="text-center pt-1 flex flex-col items-center">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="h-9 w-auto text-[#FF385C]"
-                  viewBox="0 0 32 32"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.371c0 4.14-3.328 7.75-8.5 7.75-3.08 0-5.836-1.503-7.5-3.873-1.664 2.37-4.42 3.873-7.5 3.873-5.172 0-8.5-3.61-8.5-7.75 0-1.127.284-2.22.971-3.767l.145-.353c.986-2.296 5.146-11.006 7.1-14.836l.533-1.025C8.537 1.963 9.992 1 12 1h4zm0 2.5h-4c-1.144 0-2.083.568-3.083 2.387l-.462.887C6.54 10.536 2.42 19.167 1.48 21.36c-.57 1.306-.78 2.062-.78 2.89 0 2.98 2.348 5.25 6.3 5.25 3.018 0 5.485-1.742 6.577-4.444l.423-1.146.423 1.146c1.092 2.702 3.559 4.444 6.577 4.444 3.952 0 6.3-2.27 6.3-5.25 0-.828-.21-1.584-.78-2.89-.94-2.193-5.06-10.824-6.975-14.586l-.462-.887C19.083 4.068 18.144 3.5 17 3.5h-1zm0 13c2.485 0 4.5 2.015 4.5 4.5S18.485 24.5 16 24.5s-4.5-2.015-4.5-4.5 2.015-4.5 4.5-4.5zm0 2.5c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
-                </svg>
-                <span className="font-extrabold text-3xl tracking-tight text-[#FF385C]">airbnb</span>
-              </div>
-              <h2 className="text-2xl sm:text-[26px] font-extrabold text-[#222222] mt-3">
-                Log in or sign up
-              </h2>
-              <p className="text-xs text-[#717171] mt-1">
-                Choose your role to experience guest bookings or host management.
-              </p>
+          <div>
+            {/* 1. Airbnb Outlined Bélo SVG Logo matching Screenshot */}
+            <div className="flex justify-center pt-2">
+              <svg
+                className="w-10 h-10 text-[#FF385C]"
+                viewBox="0 0 32 32"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M16 3c-1.8 0-3.3 1.2-4.4 3.2L6.8 15.5c-1.6 3.1-1.6 6.7.1 9.7 1.8 3.1 5.1 4.8 8.6 4.8s6.8-1.7 8.6-4.8c1.7-3 1.7-6.6.1-9.7l-4.8-9.3C19.3 4.2 17.8 3 16 3z" />
+                <path d="M16 16.5c-2 0-3.5 1.5-3.5 3.5s1.5 3.5 3.5 3.5 3.5-1.5 3.5-3.5-1.5-3.5-3.5-3.5z" />
+              </svg>
             </div>
 
-            {/* Notion of "Guest vs Host" Interactive Segmented Role Cards */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-[#222222] uppercase tracking-wider block">
-                Select Account Role
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("GUEST")}
-                  className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
-                    selectedRole === "GUEST"
-                      ? "border-[#222222] bg-[#F7F7F7] ring-2 ring-[#222222]/10 shadow-xs"
-                      : "border-[#DDDDDD] hover:border-[#717171]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-full bg-[#FFF0F3] text-[#FF385C] flex items-center justify-center">
-                      <Luggage className="w-4 h-4" />
-                    </div>
-                    {selectedRole === "GUEST" && (
-                      <span className="w-2 h-2 rounded-full bg-[#FF385C]" />
-                    )}
-                  </div>
-                  <div className="mt-2.5">
-                    <h4 className="font-extrabold text-sm text-[#222222]">Guest (Travelling)</h4>
-                    <p className="text-[11px] text-[#717171] leading-tight mt-0.5">
-                      Explore stays, book trips, wishlists & reviews
-                    </p>
-                  </div>
-                </button>
+            {/* 2. Heading matching Screenshot */}
+            <h2 className="text-[26px] font-bold text-[#222222] text-center mt-3 mb-4 tracking-tight">
+              Log in or sign up
+            </h2>
 
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("HOST")}
-                  className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
-                    selectedRole === "HOST"
-                      ? "border-[#222222] bg-[#F7F7F7] ring-2 ring-[#222222]/10 shadow-xs"
-                      : "border-[#DDDDDD] hover:border-[#717171]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center">
-                      <Home className="w-4 h-4" />
-                    </div>
-                    {selectedRole === "HOST" && (
-                      <span className="w-2 h-2 rounded-full bg-amber-600" />
-                    )}
-                  </div>
-                  <div className="mt-2.5">
-                    <h4 className="font-extrabold text-sm text-[#222222]">Host (Hosting)</h4>
-                    <p className="text-[11px] text-[#717171] leading-tight mt-0.5">
-                      Publish listings, calendar, payouts & inbox
-                    </p>
-                  </div>
-                </button>
-              </div>
+            {/* 3. Notion of Guest vs Host Segmented Switcher */}
+            <div className="flex bg-[#F2F2F2] p-1 rounded-xl mb-4 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRole("GUEST");
+                  setLoginInput("lakshya@gmail.com");
+                }}
+                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  selectedRole === "GUEST"
+                    ? "bg-white text-[#222222] shadow-xs font-bold"
+                    : "text-[#717171] hover:text-[#222222]"
+                }`}
+              >
+                <Luggage className="w-3.5 h-3.5 text-[#FF385C]" />
+                <span>Guest</span>
+                {selectedRole === "GUEST" && <Check className="w-3 h-3 text-[#FF385C]" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRole("HOST");
+                  setLoginInput("ravi.sharma@gmail.com");
+                }}
+                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  selectedRole === "HOST"
+                    ? "bg-white text-[#222222] shadow-xs font-bold"
+                    : "text-[#717171] hover:text-[#222222]"
+                }`}
+              >
+                <Home className="w-3.5 h-3.5 text-amber-600" />
+                <span>Host</span>
+                {selectedRole === "HOST" && <Check className="w-3 h-3 text-amber-600" />}
+              </button>
             </div>
 
-            {/* Form matching Screenshot */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* 4. Form with Input & Continue Button matching Screenshot */}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
                 <input
                   type="text"
@@ -165,36 +151,42 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
                   onChange={(e) => setLoginInput(e.target.value)}
                   placeholder="Phone number or email"
                   className="w-full px-4 py-3.5 text-base border border-[#B0B0B0] rounded-xl focus:border-black focus:ring-1 focus:ring-black outline-none transition placeholder:text-[#717171]"
+                  autoFocus
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 bg-[#FF385C] hover:bg-[#E00B41] active:scale-[0.99] text-white font-bold text-base rounded-xl transition shadow-md cursor-pointer disabled:opacity-60"
+                className="w-full py-3.5 bg-[#E00B41] hover:bg-[#D70466] active:scale-[0.99] text-white font-semibold text-base rounded-xl transition cursor-pointer shadow-xs disabled:opacity-60"
               >
                 {isSubmitting ? "Signing in..." : "Continue"}
               </button>
             </form>
 
-            {/* Divider with "or" */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-[#DDDDDD]" />
-              <span className="px-4 text-xs font-semibold text-[#717171] uppercase tracking-wider">
-                or
-              </span>
-              <div className="flex-1 h-px bg-[#DDDDDD]" />
+            {/* 5. Divider with "or" matching Screenshot */}
+            <div className="flex items-center my-5">
+              <div className="flex-1 h-px bg-[#EBEBEB]" />
+              <span className="px-4 text-xs font-normal text-[#717171]">or</span>
+              <div className="flex-1 h-px bg-[#EBEBEB]" />
             </div>
 
-            {/* Social Logins matching Screenshot */}
+            {/* 6. Social Logins matching Screenshot (Google & Apple) */}
             <div className="flex items-center justify-center gap-4">
               {/* Google Button */}
               <button
                 type="button"
                 onClick={() => {
-                  setLoginInput(selectedRole === "HOST" ? "ravi.google@gmail.com" : "lakshya.google@gmail.com");
+                  const email = selectedRole === "HOST" ? "ravi.sharma@gmail.com" : "lakshya@gmail.com";
+                  setLoginInput(email);
+                  login(email, selectedRole);
+                  setSuccessMessage(`Signed in with Google as ${selectedRole === "HOST" ? "Host (Ravi)" : "Guest (Lakshya)"}!`);
+                  setTimeout(() => {
+                    setSuccessMessage(null);
+                    onClose();
+                  }, 1000);
                 }}
-                className="w-16 h-14 rounded-2xl border border-[#DDDDDD] hover:border-[#222222] hover:bg-[#F7F7F7] flex items-center justify-center transition cursor-pointer"
+                className="w-16 h-14 sm:w-20 sm:h-14 rounded-2xl border border-[#B0B0B0] hover:border-black hover:bg-[#F7F7F7] flex items-center justify-center transition cursor-pointer"
                 title="Continue with Google"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -221,9 +213,16 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
               <button
                 type="button"
                 onClick={() => {
-                  setLoginInput(selectedRole === "HOST" ? "ravi.apple@icloud.com" : "lakshya.apple@icloud.com");
+                  const email = selectedRole === "HOST" ? "ravi.sharma@gmail.com" : "lakshya@gmail.com";
+                  setLoginInput(email);
+                  login(email, selectedRole);
+                  setSuccessMessage(`Signed in with Apple as ${selectedRole === "HOST" ? "Host (Ravi)" : "Guest (Lakshya)"}!`);
+                  setTimeout(() => {
+                    setSuccessMessage(null);
+                    onClose();
+                  }, 1000);
                 }}
-                className="w-16 h-14 rounded-2xl border border-[#DDDDDD] hover:border-[#222222] hover:bg-[#F7F7F7] flex items-center justify-center transition cursor-pointer"
+                className="w-16 h-14 sm:w-20 sm:h-14 rounded-2xl border border-[#B0B0B0] hover:border-black hover:bg-[#F7F7F7] flex items-center justify-center transition cursor-pointer"
                 title="Continue with Apple"
               >
                 <svg className="w-5 h-5 fill-current text-[#222222]" viewBox="0 0 24 24">
@@ -232,55 +231,40 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
               </button>
             </div>
 
-            {/* Quick 1-Click Persona Accounts (Guest vs Host) */}
-            <div className="pt-2 border-t border-[#EBEBEB]">
-              <p className="text-xs font-semibold text-[#717171] mb-2.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Instant 1-Click Demo Accounts:</span>
-              </p>
-              <div className="space-y-2">
-                {availablePersonas.map((p) => {
+            {/* 7. Quick 1-Click Simplified Persona Switcher */}
+            <div className="mt-5 pt-3 border-t border-[#EBEBEB]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#717171] flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-500" />
+                  <span>1-Click Test Accounts:</span>
+                </span>
+                <span className="text-[10px] text-[#717171]">Active: {persona.role}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {availablePersonas.slice(0, 2).map((p) => {
                   const isCurrent = persona.id === p.id && persona.role === p.role;
                   return (
                     <button
                       key={`${p.id}-${p.role}`}
                       type="button"
                       onClick={() => handleSelectQuickPersona(p)}
-                      className={`w-full p-2.5 rounded-2xl border flex items-center justify-between transition cursor-pointer text-left ${
+                      className={`p-2 rounded-xl border flex items-center gap-2 text-left transition cursor-pointer ${
                         isCurrent
-                          ? "border-[#222222] bg-[#F7F7F7]"
-                          : "border-[#EBEBEB] hover:border-[#DDDDDD] hover:bg-[#FAFAFA]"
+                          ? "border-[#222222] bg-[#F7F7F7] shadow-2xs"
+                          : "border-[#EBEBEB] hover:border-[#717171] hover:bg-[#FAFAFA]"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={p.avatarUrl}
-                          alt={p.fullName}
-                          className="w-9 h-9 rounded-full object-cover border border-[#DDDDDD]"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#222222]">{p.fullName}</span>
-                            <span
-                              className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1 ${
-                                p.role === "HOST"
-                                  ? "bg-amber-100 text-amber-800"
-                                  : "bg-[#FFF0F3] text-[#FF385C]"
-                              }`}
-                            >
-                              <span>{p.role}</span>
-                              {p.isSuperhost && (
-                                <span className="flex items-center gap-0.5">
-                                  <Sparkles className="w-2.5 h-2.5 text-amber-600" />
-                                  Superhost
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#717171]">{p.email}</p>
-                        </div>
+                      <img
+                        src={p.avatarUrl}
+                        alt={p.fullName}
+                        className="w-7 h-7 rounded-full object-cover border border-[#DDDDDD] flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold text-[#222222] truncate">{p.fullName}</p>
+                        <p className={`text-[9px] font-extrabold uppercase ${p.role === "HOST" ? "text-amber-700" : "text-[#FF385C]"}`}>
+                          {p.role}
+                        </p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-[#717171]" />
                     </button>
                   );
                 })}

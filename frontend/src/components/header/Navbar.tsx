@@ -327,6 +327,18 @@ export default function Navbar({
 
               {/* Section 1: User Actions with Authentic Icons */}
               <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    openAuthModal();
+                  }}
+                  className="w-full text-left px-5 py-2.5 text-sm font-semibold text-[#FF385C] hover:bg-[#FFF0F3] flex items-center gap-3 transition cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-[#FF385C]" />
+                  <span>Log in or sign up</span>
+                </button>
+
                 {isHost && (
                   <Link
                     href="/hosting"

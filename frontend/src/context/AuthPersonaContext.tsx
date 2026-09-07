@@ -8,7 +8,7 @@ import AuthModal from "@/components/auth/AuthModal";
 export const PRESET_PERSONAS: Record<string, UserPersona> = {
   GUEST: {
     id: 1,
-    email: "lakshya.guest@airbnb.demo",
+    email: "lakshya@gmail.com",
     fullName: "Lakshya Arora",
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
     role: "GUEST",
@@ -18,7 +18,7 @@ export const PRESET_PERSONAS: Record<string, UserPersona> = {
   },
   HOST_RAVI: {
     id: 2,
-    email: "ravi.sharma@airbnb.demo",
+    email: "ravi.sharma@gmail.com",
     fullName: "Ravi Sharma",
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
     role: "HOST",
@@ -28,7 +28,7 @@ export const PRESET_PERSONAS: Record<string, UserPersona> = {
   },
   HOST_SARAH: {
     id: 3,
-    email: "sarah.jenkins@airbnb.demo",
+    email: "sarah.jenkins@gmail.com",
     fullName: "Sarah Jenkins",
     avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
     role: "HOST",
