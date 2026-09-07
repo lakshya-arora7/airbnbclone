@@ -1,0 +1,784 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Plus, Minus, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
+
+export interface SearchState {
+  location: string;
+  startDate: string | null; // e.g., '2026-09-08'
+  endDate: string | null;   // e.g., '2026-09-09'
+  displayDates: string;
+  adults: number;
+  children: number;
+  infants: number;
+  pets: number;
+  flexibility: string;
+}
+
+interface SearchDeckProps {
+  isOpen: boolean;
+  activeTab: "where" | "when" | "who" | null;
+  onOpenTab: (tab: "where" | "when" | "who") => void;
+  onClose: () => void;
+  onSearch: (state: SearchState) => void;
+  initialState?: Partial<SearchState>;
+  activeMode?: "all" | "homes" | "experiences" | "services";
+}
+
+// Destination suggestions from user Screenshot 2
+const SUGGESTED_DESTINATIONS = [
+  {
+    id: "nearby",
+    title: "Nearby",
+    subtitle: "Find what’s around you",
+    badgeBg: "bg-[#F0F9FF] border-[#E0F2FE]",
+    iconColor: "text-[#0284C7]",
+    icon: (
+      <svg className="w-5 h-5 text-[#0284C7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 2L19 21L12 17L5 21L12 2Z" fill="currentColor" fillOpacity="0.15" />
+      </svg>
+    ),
+    locationValue: "Noida"
+  },
+  {
+    id: "gr-noida",
+    title: "Greater Noida, Uttar Pradesh",
+    subtitle: "Guests interested in Noida also looked here",
+    badgeBg: "bg-[#FFF1F2] border-[#FFE4E6]",
+    iconColor: "text-[#E11D48]",
+    icon: (
+      <svg className="w-5 h-5 text-[#E11D48]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M3 10L12 3L21 10V20C21 20.5 20.5 21 20 21H4C3.5 21 3 20.5 3 20V10Z" />
+        <path d="M9 21V12H15V21" />
+        <line x1="18" y1="6" x2="20" y2="4" />
+      </svg>
+    ),
+    locationValue: "Greater Noida"
+  },
+  {
+    id: "ghaziabad",
+    title: "Ghaziabad, Uttar Pradesh",
+    subtitle: "Near you",
+    badgeBg: "bg-[#FEFCE8] border-[#FEF08A]",
+    iconColor: "text-[#854D0E]",
+    icon: (
+      <svg className="w-5 h-5 text-[#854D0E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="4" y="6" width="10" height="15" rx="1" />
+        <path d="M17 10C19 8 20 5 20 5C20 5 17 6 15 8" />
+        <path d="M16 13C18 12 21 11 21 11C21 11 18 13 16 15" />
+        <line x1="16" y1="8" x2="16" y2="21" />
+      </svg>
+    ),
+    locationValue: "Ghaziabad"
+  },
+  {
+    id: "gurgaon",
+    title: "Gurgaon District, Haryana",
+    subtitle: "Guests interested in Noida also looked here",
+    badgeBg: "bg-[#FEF3C7] border-[#FDE68A]",
+    iconColor: "text-[#B45309]",
+    icon: (
+      <svg className="w-5 h-5 text-[#B45309]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="4" width="11" height="17" rx="1" />
+        <path d="M17 9C19 7 20 4 20 4C20 4 17 5 15 7" />
+        <line x1="16" y1="7" x2="16" y2="21" />
+        <rect x="6" y="8" width="2" height="2" fill="currentColor" />
+        <rect x="10" y="8" width="2" height="2" fill="currentColor" />
+        <rect x="6" y="12" width="2" height="2" fill="currentColor" />
+        <rect x="10" y="12" width="2" height="2" fill="currentColor" />
+      </svg>
+    ),
+    locationValue: "Gurgaon"
+  },
+  {
+    id: "delhi",
+    title: "New Delhi, Delhi",
+    subtitle: "For sights like India Gate & Hauz Khas",
+    badgeBg: "bg-[#ECFDF5] border-[#D1FAE5]",
+    iconColor: "text-[#059669]",
+    icon: (
+      <svg className="w-5 h-5 text-[#059669]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 21V9L12 4L20 9V21" />
+        <path d="M9 21V13C9 11.5 10.5 10 12 10C13.5 10 15 11.5 15 13V21" />
+        <line x1="2" y1="21" x2="22" y2="21" />
+      </svg>
+    ),
+    locationValue: "New Delhi"
+  },
+  {
+    id: "goa",
+    title: "Goa, India",
+    subtitle: "For sunny beaches, Candolim & private luxury villas",
+    badgeBg: "bg-[#FFF7ED] border-[#FFEDD5]",
+    iconColor: "text-[#EA580C]",
+    icon: (
+      <svg className="w-5 h-5 text-[#EA580C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="1" x2="12" y2="3" />
+        <line x1="12" y1="21" x2="12" y2="23" />
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+        <line x1="1" y1="12" x2="3" y2="12" />
+        <line x1="21" y1="12" x2="23" y2="12" />
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+      </svg>
+    ),
+    locationValue: "Goa"
+  },
+  {
+    id: "mumbai",
+    title: "Mumbai, Maharashtra",
+    subtitle: "For Bandra West sea-facing penthouses & city vibes",
+    badgeBg: "bg-[#F5F3FF] border-[#EDE9FE]",
+    iconColor: "text-[#7C3AED]",
+    icon: (
+      <svg className="w-5 h-5 text-[#7C3AED]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="4" y="2" width="16" height="20" rx="2" />
+        <line x1="9" y1="6" x2="9.01" y2="6" strokeWidth="2.5" />
+        <line x1="15" y1="6" x2="15.01" y2="6" strokeWidth="2.5" />
+        <line x1="9" y1="10" x2="9.01" y2="10" strokeWidth="2.5" />
+        <line x1="15" y1="10" x2="15.01" y2="10" strokeWidth="2.5" />
+        <line x1="9" y1="14" x2="9.01" y2="14" strokeWidth="2.5" />
+        <line x1="15" y1="14" x2="15.01" y2="14" strokeWidth="2.5" />
+      </svg>
+    ),
+    locationValue: "Mumbai"
+  },
+  {
+    id: "manali",
+    title: "Manali, Himachal Pradesh",
+    subtitle: "For snowy cedar chalets & mountain valley views",
+    badgeBg: "bg-[#EFF6FF] border-[#DBEAFE]",
+    iconColor: "text-[#2563EB]",
+    icon: (
+      <svg className="w-5 h-5 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M8 3l4 8 5-5 5 15H2L8 3z" />
+      </svg>
+    ),
+    locationValue: "Manali"
+  },
+  {
+    id: "paris",
+    title: "Paris, France",
+    subtitle: "For Eiffel Tower views & classic Parisian balconies",
+    badgeBg: "bg-[#FFF1F2] border-[#FFE4E6]",
+    iconColor: "text-[#E11D48]",
+    icon: (
+      <svg className="w-5 h-5 text-[#E11D48]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 2v20M7 22l5-18 5 18M9 15h6M6 22h12" />
+      </svg>
+    ),
+    locationValue: "Paris"
+  }
+];
+
+export default function SearchDeck({
+  isOpen,
+  activeTab,
+  onOpenTab,
+  onClose,
+  onSearch,
+  initialState,
+  activeMode = "all"
+}: SearchDeckProps) {
+  const { t } = useLanguageCurrency();
+  const wherePlaceholder = activeMode === "experiences"
+    ? "Search by city or landmark"
+    : t("search.searchDestinations", "Search destinations");
+  const [location, setLocation] = useState(initialState?.location || "");
+  const [startDate, setStartDate] = useState<string | null>(initialState?.startDate || "2026-09-08");
+  const [endDate, setEndDate] = useState<string | null>(initialState?.endDate || "2026-09-09");
+  const [calendarMode, setCalendarMode] = useState<"dates" | "flexible">("dates");
+  const [flexibility, setFlexibility] = useState("Exact dates");
+
+  const [adults, setAdults] = useState(initialState?.adults || 0);
+  const [children, setChildren] = useState(initialState?.children || 0);
+  const [infants, setInfants] = useState(initialState?.infants || 0);
+  const [pets, setPets] = useState(initialState?.pets || 0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus location input when tab becomes 'where'
+  useEffect(() => {
+    if (activeTab === "where") {
+      setTimeout(() => locationInputRef.current?.focus(), 50);
+    }
+  }, [activeTab]);
+
+  // Handle outside click to close popovers
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, onClose]);
+
+  // Compute display dates string
+  const getDisplayDates = () => {
+    if (startDate && endDate) {
+      const sDay = parseInt(startDate.split("-")[2]);
+      const eDay = parseInt(endDate.split("-")[2]);
+      return `${sDay}–${eDay} Sept`;
+    } else if (startDate) {
+      return `${parseInt(startDate.split("-")[2])} Sept`;
+    }
+    return t("search.addDates", "Add dates");
+  };
+
+  // Compute guests display string
+  const totalGuests = adults + children;
+  const getDisplayGuests = () => {
+    if (totalGuests > 0) {
+      let text = `${totalGuests} guest${totalGuests > 1 ? "s" : ""}`;
+      if (infants > 0) text += `, ${infants} infant${infants > 1 ? "s" : ""}`;
+      if (pets > 0) text += `, ${pets} pet${pets > 1 ? "s" : ""}`;
+      return text;
+    }
+    return t("search.addGuests", "Add guests");
+  };
+
+  const handleExecuteSearch = () => {
+    onSearch({
+      location: location.trim(),
+      startDate,
+      endDate,
+      displayDates: getDisplayDates(),
+      adults,
+      children,
+      infants,
+      pets,
+      flexibility
+    });
+    onClose();
+  };
+
+  // Date selection logic
+  const handleDateClick = (dateStr: string) => {
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(dateStr);
+      setEndDate(null);
+    } else if (startDate && !endDate) {
+      if (new Date(dateStr) < new Date(startDate)) {
+        setStartDate(dateStr);
+        setEndDate(null);
+      } else {
+        setEndDate(dateStr);
+        // Automatically smoothly advance to 'who' step
+        setTimeout(() => onOpenTab("who"), 150);
+      }
+    }
+  };
+
+  const isDateSelected = (dateStr: string) => dateStr === startDate || dateStr === endDate;
+  const isDateInRange = (dateStr: string) => {
+    if (!startDate || !endDate) return false;
+    return dateStr > startDate && dateStr < endDate;
+  };
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      {/* Background Dim Backdrop when expanded */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black/25 backdrop-blur-[0.5px] z-20 transition-opacity duration-300"
+        />
+      )}
+
+      {/* Interactive Segmented Search Capsule */}
+      <div className="flex justify-center w-full px-4 pb-4 pt-1 relative z-30">
+        <div
+          className={`flex items-center rounded-full border transition-all duration-300 ease-out ${
+            isOpen
+              ? "bg-[#EBEBEB] border-[#DDDDDD] shadow-[0_6px_20px_rgba(0,0,0,0.12)] p-1.5"
+              : "bg-white border-[#DDDDDD] shadow-[0_3px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] p-1"
+          } w-full max-w-2xl sm:max-w-3xl`}
+        >
+          {/* Segment 1: Where */}
+          <div
+            onClick={() => onOpenTab("where")}
+            className={`flex-1 px-5 py-2.5 cursor-pointer transition-all duration-300 rounded-full ${
+              activeTab === "where"
+                ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
+                : "hover:bg-black/5"
+            }`}
+          >
+            <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.where", "Where")}</p>
+            {activeTab === "where" ? (
+              <div className="flex items-center">
+                <input
+                  ref={locationInputRef}
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleExecuteSearch();
+                    }
+                  }}
+                  placeholder={wherePlaceholder}
+                  className="w-full bg-transparent text-sm font-medium text-[#222222] focus:outline-none placeholder-[#717171] truncate"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                {location && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLocation("");
+                    }}
+                    className="p-1 rounded-full hover:bg-[#EBEBEB] text-[#717171]"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm font-medium text-[#717171] truncate">
+                {location || wherePlaceholder}
+              </p>
+            )}
+          </div>
+
+          <span
+            className={`h-7 w-px transition-opacity duration-200 ${
+              activeTab === "where" || activeTab === "when" ? "opacity-0" : "bg-[#DDDDDD]"
+            }`}
+          />
+
+          {/* Segment 2: When */}
+          <div
+            onClick={() => onOpenTab("when")}
+            className={`flex-1 px-5 py-2.5 cursor-pointer transition-all duration-300 rounded-full ${
+              activeTab === "when"
+                ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
+                : "hover:bg-black/5"
+            }`}
+          >
+            <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.when", "When")}</p>
+            <p className="text-sm font-medium text-[#717171] truncate">
+              {getDisplayDates()}
+            </p>
+          </div>
+
+          <span
+            className={`h-7 w-px transition-opacity duration-200 ${
+              activeTab === "when" || activeTab === "who" ? "opacity-0" : "bg-[#DDDDDD]"
+            }`}
+          />
+
+          {/* Segment 3: Who & Search Button */}
+          <div
+            onClick={() => onOpenTab("who")}
+            className={`flex-1 pl-5 pr-2 py-1.5 cursor-pointer transition-all duration-300 rounded-full flex items-center justify-between gap-2 ${
+              activeTab === "who"
+                ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
+                : "hover:bg-black/5"
+            }`}
+          >
+            <div className="truncate">
+              <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
+              <p className="text-sm font-medium text-[#717171] truncate">
+                {getDisplayGuests()}
+              </p>
+            </div>
+
+            {/* Action Search Button matching Screenshot 3 */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExecuteSearch();
+              }}
+              className={`rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-md ${
+                isOpen || activeTab === "who" ? "px-5 py-2.5 gap-2" : "w-10 h-10 flex-shrink-0"
+              }`}
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4 stroke-[3]" />
+              {(isOpen || activeTab === "who") && <span className="pr-1">{t("search.search", "Search")}</span>}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================ */}
+      {/* POP OVERS WITH SMOOTH ANIMATION & EXACT SCREENSHOT DESIGNS   */}
+      {/* ============================================================ */}
+      {isOpen && (
+        <div className="absolute top-[80px] left-0 right-0 z-40 flex justify-center px-4 pointer-events-none">
+          {/* Matched to the exact max-w-2xl / sm:max-w-3xl of the search capsule for pixel alignment */}
+          <div className="w-full max-w-2xl sm:max-w-3xl relative pointer-events-auto">
+            {/* 1. WHERE POPOVER (Matches Screenshot 2: Aligned to Left Edge of Capsule) */}
+            <div
+              className={`absolute top-0 left-0 w-[460px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-6 transition-all duration-300 ease-out origin-top-left ${
+                activeTab === "where"
+                  ? "opacity-100 scale-100 translate-y-0 visible"
+                  : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
+              }`}
+            >
+              {/* Recent searches header & card */}
+              <div className="mb-5">
+                <p className="text-xs font-bold text-[#222222] mb-3">Recent searches</p>
+                <div
+                  onClick={() => {
+                    setLocation("Noida");
+                    setStartDate("2026-09-08");
+                    setEndDate("2026-09-09");
+                    setAdults(4);
+                    onOpenTab("when");
+                  }}
+                  className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF0F3] border border-[#FFE4E8] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    {/* Architectural Building & Forest Icon */}
+                    <svg className="w-6 h-6 text-[#FF385C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="4" y="6" width="9" height="15" rx="1" />
+                      <line x1="7" y1="10" x2="7.01" y2="10" strokeWidth="2.5" />
+                      <line x1="10" y1="10" x2="10.01" y2="10" strokeWidth="2.5" />
+                      <line x1="7" y1="14" x2="7.01" y2="14" strokeWidth="2.5" />
+                      <line x1="10" y1="14" x2="10.01" y2="14" strokeWidth="2.5" />
+                      <path d="M17 12L19 9L21 12" />
+                      <path d="M16 16L19 12L22 16" />
+                      <line x1="19" y1="16" x2="19" y2="21" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-sm text-[#222222]">Noida</h5>
+                    <p className="text-xs text-[#717171] mt-0.5">8–9 Sept · 4 guests</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Suggested destinations header & list */}
+              <div>
+                <p className="text-xs font-bold text-[#222222] mb-3">Suggested destinations</p>
+                <div className="space-y-1">
+                  {SUGGESTED_DESTINATIONS.map((dest) => (
+                    <div
+                      key={dest.id}
+                      onClick={() => {
+                        setLocation(dest.locationValue);
+                        onOpenTab("when");
+                      }}
+                      className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-[#F7F7F7] cursor-pointer transition group"
+                    >
+                      <div
+                        className={`w-12 h-12 rounded-2xl ${dest.badgeBg} border flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
+                      >
+                        {dest.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <h5 className="font-bold text-sm text-[#222222] truncate">{dest.title}</h5>
+                        <p className="text-xs text-[#717171] mt-0.5 truncate">{dest.subtitle}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. WHEN POPOVER (Matches Screenshot 1: Centered under Capsule) */}
+            <div
+              className={`absolute top-0 left-1/2 -translate-x-1/2 w-[820px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-7 transition-all duration-300 ease-out origin-top ${
+                activeTab === "when"
+                  ? "opacity-100 scale-100 translate-y-0 visible"
+                  : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
+              }`}
+            >
+              {/* Top Segmented Toggle: Dates vs Flexible */}
+              <div className="flex justify-center mb-6">
+                <div className="bg-[#EBEBEB] p-1 rounded-full inline-flex items-center">
+                  <button
+                    onClick={() => setCalendarMode("dates")}
+                    className={`px-7 py-2 rounded-full text-xs font-bold transition-all ${
+                      calendarMode === "dates"
+                        ? "bg-white text-[#222222] shadow-sm"
+                        : "text-[#717171] hover:text-[#222222]"
+                    }`}
+                  >
+                    Dates
+                  </button>
+                  <button
+                    onClick={() => setCalendarMode("flexible")}
+                    className={`px-7 py-2 rounded-full text-xs font-bold transition-all ${
+                      calendarMode === "flexible"
+                        ? "bg-white text-[#222222] shadow-sm"
+                        : "text-[#717171] hover:text-[#222222]"
+                    }`}
+                  >
+                    Flexible
+                  </button>
+                </div>
+              </div>
+
+              {/* Dual-Month Calendar Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                {/* Month 1: September 2026 */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <button
+                      className="p-1 rounded-full hover:bg-[#F7F7F7] text-[#222222] transition"
+                      aria-label="Previous month"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <h4 className="font-bold text-sm text-[#222222]">September 2026</h4>
+                    <span className="w-6" /> {/* Placeholder for balance */}
+                  </div>
+
+                  {/* Day Header S M T W T F S */}
+                  <div className="grid grid-cols-7 text-center text-xs font-semibold text-[#717171] mb-2">
+                    <span>S</span>
+                    <span>M</span>
+                    <span>T</span>
+                    <span>W</span>
+                    <span>T</span>
+                    <span>F</span>
+                    <span>S</span>
+                  </div>
+
+                  {/* September Dates: Starts on Tuesday (index 2) */}
+                  <div className="grid grid-cols-7 gap-y-1 text-center text-xs">
+                    {/* Blank Sunday, Monday */}
+                    <span />
+                    <span />
+
+                    {/* Past days (1-5) grayed out matching screenshot */}
+                    <span className="py-2.5 text-[#B0B0B0] cursor-not-allowed">1</span>
+                    <span className="py-2.5 text-[#B0B0B0] cursor-not-allowed">2</span>
+                    <span className="py-2.5 text-[#B0B0B0] cursor-not-allowed">3</span>
+                    <span className="py-2.5 text-[#B0B0B0] cursor-not-allowed">4</span>
+                    <span className="py-2.5 text-[#B0B0B0] cursor-not-allowed">5</span>
+
+                    {/* Active days (6 to 30) */}
+                    {Array.from({ length: 25 }, (_, i) => i + 6).map((day) => {
+                      const dayStr = day < 10 ? `0${day}` : `${day}`;
+                      const dateKey = `2026-09-${dayStr}`;
+                      const isSelected = isDateSelected(dateKey);
+                      const inRange = isDateInRange(dateKey);
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => handleDateClick(dateKey)}
+                          className={`py-2.5 font-semibold relative transition rounded-full hover:border hover:border-[#222222] ${
+                            isSelected
+                              ? "bg-[#222222] text-white"
+                              : inRange
+                              ? "bg-[#F7F7F7] text-[#222222]"
+                              : "text-[#222222]"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Month 2: October 2026 */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="w-6" /> {/* Placeholder for balance */}
+                    <h4 className="font-bold text-sm text-[#222222]">October 2026</h4>
+                    <button
+                      className="p-1 rounded-full hover:bg-[#F7F7F7] text-[#222222] transition"
+                      aria-label="Next month"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Day Header S M T W T F S */}
+                  <div className="grid grid-cols-7 text-center text-xs font-semibold text-[#717171] mb-2">
+                    <span>S</span>
+                    <span>M</span>
+                    <span>T</span>
+                    <span>W</span>
+                    <span>T</span>
+                    <span>F</span>
+                    <span>S</span>
+                  </div>
+
+                  {/* October Dates: Starts on Thursday (index 4) */}
+                  <div className="grid grid-cols-7 gap-y-1 text-center text-xs">
+                    {/* Blank Sunday to Wednesday */}
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+
+                    {/* All October Days (1 to 31) */}
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+                      const dayStr = day < 10 ? `0${day}` : `${day}`;
+                      const dateKey = `2026-10-${dayStr}`;
+                      const isSelected = isDateSelected(dateKey);
+                      const inRange = isDateInRange(dateKey);
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => handleDateClick(dateKey)}
+                          className={`py-2.5 font-semibold relative transition rounded-full hover:border hover:border-[#222222] ${
+                            isSelected
+                              ? "bg-[#222222] text-white"
+                              : inRange
+                              ? "bg-[#F7F7F7] text-[#222222]"
+                              : "text-[#222222]"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Tolerance Pills matching Screenshot 1 */}
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-[#EBEBEB]">
+                {[
+                  "Exact dates",
+                  "± 1 day",
+                  "± 2 days",
+                  "± 3 days",
+                  "± 7 days",
+                  "± 14 days"
+                ].map((pill) => (
+                  <button
+                    key={pill}
+                    onClick={() => setFlexibility(pill)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold border transition ${
+                      flexibility === pill
+                        ? "border-[#222222] bg-white text-[#222222] shadow-xs"
+                        : "border-[#DDDDDD] bg-white text-[#222222] hover:border-[#222222]"
+                    }`}
+                  >
+                    {pill}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. WHO POPOVER (Matches Screenshot 3: Aligned to Right Edge of Capsule) */}
+            <div
+              className={`absolute top-0 right-0 w-[420px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-6 transition-all duration-300 ease-out origin-top-right ${
+                activeTab === "who"
+                  ? "opacity-100 scale-100 translate-y-0 visible"
+                  : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
+              }`}
+            >
+              <div className="space-y-6">
+                {/* Adults */}
+                <div className="flex items-center justify-between pb-5 border-b border-[#EBEBEB]">
+                  <div>
+                    <h5 className="font-bold text-sm text-[#222222]">Adults</h5>
+                    <p className="text-xs text-[#717171] mt-0.5">Ages 13 or above</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setAdults(Math.max(0, adults - 1))}
+                      disabled={adults <= 0}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] disabled:opacity-30 disabled:hover:border-[#DDDDDD] transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold">{adults}</span>
+                    <button
+                      onClick={() => setAdults(adults + 1)}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Children */}
+                <div className="flex items-center justify-between pb-5 border-b border-[#EBEBEB]">
+                  <div>
+                    <h5 className="font-bold text-sm text-[#222222]">Children</h5>
+                    <p className="text-xs text-[#717171] mt-0.5">Ages 2–12</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setChildren(Math.max(0, children - 1))}
+                      disabled={children <= 0}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] disabled:opacity-30 disabled:hover:border-[#DDDDDD] transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold">{children}</span>
+                    <button
+                      onClick={() => setChildren(children + 1)}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Infants */}
+                <div className="flex items-center justify-between pb-5 border-b border-[#EBEBEB]">
+                  <div>
+                    <h5 className="font-bold text-sm text-[#222222]">Infants</h5>
+                    <p className="text-xs text-[#717171] mt-0.5">Under 2</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setInfants(Math.max(0, infants - 1))}
+                      disabled={infants <= 0}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] disabled:opacity-30 disabled:hover:border-[#DDDDDD] transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold">{infants}</span>
+                    <button
+                      onClick={() => setInfants(infants + 1)}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pets */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h5 className="font-bold text-sm text-[#222222]">Pets</h5>
+                    <span className="text-xs text-[#717171] mt-0.5 block">
+                      Service animals stay free of charge
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setPets(Math.max(0, pets - 1))}
+                      disabled={pets <= 0}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] disabled:opacity-30 disabled:hover:border-[#DDDDDD] transition"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold">{pets}</span>
+                    <button
+                      onClick={() => setPets(pets + 1)}
+                      className="w-8 h-8 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#717171] hover:border-[#222222] hover:text-[#222222] transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
