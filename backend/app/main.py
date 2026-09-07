@@ -22,8 +22,13 @@ async def lifespan(app: FastAPI):
         from app.models.user import User
         if db.query(User).count() == 0:
             seed.seed_personas(db)
+
+        from app.models.listing import Listing
+        if db.query(Listing).count() == 0:
+            from seed_5_sample_listings import seed_five_sample_listings
+            seed_five_sample_listings(db)
     except Exception as e:
-        print(f"[Startup] Error during personas check: {e}")
+        print(f"[Startup] Error during initialization: {e}")
     finally:
         db.close()
 

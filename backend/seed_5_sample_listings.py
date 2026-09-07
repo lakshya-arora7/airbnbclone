@@ -16,10 +16,13 @@ from app.models.booking import Booking
 from app.models.review import Review
 from app.models.wishlist import Wishlist, WishlistItem
 
-def seed_five_sample_listings():
+def seed_five_sample_listings(db=None):
     print("[Seed] Initializing database tables...")
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+    close_at_end = False
+    if db is None:
+        db = SessionLocal()
+        close_at_end = True
 
     try:
         # 1. Clean existing listings, images, bookings, reviews, wishlist items
@@ -338,7 +341,8 @@ def seed_five_sample_listings():
         print(f"[Error] Failed to seed sample listings: {e}")
         raise e
     finally:
-        db.close()
+        if close_at_end:
+            db.close()
 
 if __name__ == "__main__":
     seed_five_sample_listings()

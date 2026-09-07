@@ -1,6 +1,20 @@
 import { Listing, ListingImage, UserPersona } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const LIVE_RAILWAY_API_URL = "https://airbnbclone-production-cbcb.up.railway.app/api/v1";
+
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1"
+  ) {
+    return LIVE_RAILWAY_API_URL;
+  }
+  return "http://localhost:8000/api/v1";
+}
 
 /**
  * Normalizes backend snake_case listing objects into typed frontend Listing entities.
@@ -138,7 +152,7 @@ export const api = {
       if (filters?.maxPrice) params.append("max_price", filters.maxPrice.toString());
       if (filters?.guests) params.append("guests", filters.guests.toString());
 
-      const res = await fetch(`${API_BASE_URL}/listings?${params.toString()}`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings?${params.toString()}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -191,7 +205,7 @@ export const api = {
    */
   async getListingById(id: number): Promise<Listing | null> {
     try {
-      const res = await fetch(`${API_BASE_URL}/listings/${id}`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings/${id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -216,7 +230,7 @@ export const api = {
    */
   async getBookedDates(listingId: number): Promise<BookedDateRange[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/listings/${listingId}/booked-dates`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings/${listingId}/booked-dates`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -243,7 +257,7 @@ export const api = {
     error?: string;
   }> {
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings`, {
+      const res = await fetch(`${getApiBaseUrl()}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -284,7 +298,7 @@ export const api = {
    */
   async getMyTrips(userId: number = 1): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings/my-trips`, {
+      const res = await fetch(`${getApiBaseUrl()}/bookings/my-trips`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -329,7 +343,7 @@ export const api = {
    */
   async cancelBooking(bookingId: number, userId: number = 1): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
+      const res = await fetch(`${getApiBaseUrl()}/bookings/${bookingId}/cancel`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -350,7 +364,7 @@ export const api = {
   async getHostListings(hostId: number = 2): Promise<Listing[]> {
     let serverListings: Listing[] = [];
     try {
-      const res = await fetch(`${API_BASE_URL}/host/listings`, {
+      const res = await fetch(`${getApiBaseUrl()}/host/listings`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -381,7 +395,7 @@ export const api = {
    */
   async getHostReservations(hostId: number = 2): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/host/reservations`, {
+      const res = await fetch(`${getApiBaseUrl()}/host/reservations`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -406,7 +420,7 @@ export const api = {
   async createListing(listingData: any, hostId: number = 2): Promise<Listing | null> {
     let createdListing: Listing | null = null;
     try {
-      const res = await fetch(`${API_BASE_URL}/listings`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -445,7 +459,7 @@ export const api = {
   async deleteListing(listingId: number, hostId: number = 2): Promise<boolean> {
     removeLocalCustomListing(listingId);
     try {
-      const res = await fetch(`${API_BASE_URL}/listings/${listingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings/${listingId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -466,7 +480,7 @@ export const api = {
   async updateListing(listingId: number, updateData: any, hostId: number = 2): Promise<Listing | null> {
     let updatedListing: Listing | null = null;
     try {
-      const res = await fetch(`${API_BASE_URL}/listings/${listingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/listings/${listingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -513,7 +527,7 @@ export const api = {
    */
   async getListingBookings(listingId: number, hostId: number = 2): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings/listing/${listingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/bookings/listing/${listingId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -546,7 +560,7 @@ export const api = {
       if (payload.guestsCount) body.guests_count = payload.guestsCount;
       if (payload.status) body.status = payload.status;
 
-      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -575,7 +589,7 @@ export const api = {
    */
   async getWishlist(userId: number = 1): Promise<Listing[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/wishlists`, {
+      const res = await fetch(`${getApiBaseUrl()}/wishlists`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -598,7 +612,7 @@ export const api = {
    */
   async toggleWishlist(listingId: number, userId: number = 1): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE_URL}/wishlists/toggle/${listingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/wishlists/toggle/${listingId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -630,7 +644,7 @@ export const api = {
     valueRating?: number;
   }, userId: number = 1): Promise<any> {
     try {
-      const res = await fetch(`${API_BASE_URL}/reviews`, {
+      const res = await fetch(`${getApiBaseUrl()}/reviews`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -662,7 +676,7 @@ export const api = {
    */
   async getListingReviews(listingId: number): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/reviews/listing/${listingId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/reviews/listing/${listingId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -681,7 +695,7 @@ export const api = {
    */
   async getUserReviews(userId: number = 1): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/reviews/user/${userId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/reviews/user/${userId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -705,7 +719,7 @@ export const api = {
    */
   async login(loginId: string, role: "GUEST" | "HOST" = "GUEST", fullName?: string): Promise<any> {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -727,7 +741,7 @@ export const api = {
    */
   async switchPersona(role: "GUEST" | "HOST"): Promise<any> {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/switch-persona`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/switch-persona`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role }),
@@ -745,7 +759,7 @@ export const api = {
    */
   async selectUser(userId: number): Promise<any> {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/select-user/${userId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/select-user/${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -762,7 +776,7 @@ export const api = {
    */
   async getUsers(): Promise<any[]> {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/users`, {
+      const res = await fetch(`${getApiBaseUrl()}/auth/users`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
