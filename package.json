@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "description": "Airbnb Clone root workspace",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "npm --prefix frontend run dev",
     "backend": "python -m uvicorn app.main:app --reload --port 8000 --app-dir backend",
     "test:backend": "python -m pytest backend -v",
-    "build": "npm --prefix frontend run build",
+    "prebuild": "npm --prefix frontend install --include=dev",
+    "build": "npm --prefix frontend install --include=dev && npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
     "lint": "npm --prefix frontend run lint"
   }
