@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -154,10 +154,12 @@ export default function HostDashboardPage() {
     }
   }, []);
 
+  const isSwitchingToTravellingRef = useRef(false);
+
   // Load host listings and reservations from live backend API
   useEffect(() => {
-    // When on hosting dashboard, ensure hosting persona
-    if (persona.role !== "HOST") {
+    // When on hosting dashboard, ensure hosting persona unless actively switching to travelling
+    if (!isSwitchingToTravellingRef.current && persona.role !== "HOST") {
       switchToHosting();
     }
     const hostIdToQuery = persona.id === 2 ? 2 : (persona.id || 2);
@@ -179,13 +181,13 @@ export default function HostDashboardPage() {
 
     const loadLiveMessages = () => {
       api.getMessagesThreads(hostIdToQuery).then((liveThreads) => {
-        if (liveThreads && liveThreads.length > 0) {
+        if (Array.isArray(liveThreads) && liveThreads.length > 0) {
           const mapped: ChatThread[] = liveThreads.map((t: any) => ({
-            id: t.thread_id,
-            guestId: t.other_user.id,
-            listingId: t.listing?.id,
-            guestName: t.other_user.full_name,
-            guestAvatar: t.other_user.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            id: t.thread_id || t.id,
+            guestId: t.other_user?.id || t.other_user_id || 1,
+            listingId: t.listing?.id || t.listing_id || 1,
+            guestName: t.other_user?.full_name || t.other_user_name || "Guest",
+            guestAvatar: t.other_user?.avatar_url || t.other_user_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
             guestRating: 5.0,
             reservationDates: t.listing ? `${t.listing.city}, ${t.listing.country}` : "Direct Message",
             checkIn: "Check-in info",
@@ -193,17 +195,17 @@ export default function HostDashboardPage() {
             guestsCount: 2,
             listingTitle: t.listing?.title || "Property Inquiry",
             totalPayout: t.listing?.price_per_night || 0,
-            confirmationCode: `TH-${t.thread_id}`,
+            confirmationCode: `TH-${t.thread_id || t.id}`,
             phoneNumber: "+91 98765 43210",
-            lastMessageSnippet: t.last_message || "No messages yet",
+            lastMessageSnippet: t.last_message || t.last_message_snippet || "No messages yet",
             lastMessageDate: t.last_message_date || "Today",
-            unread: t.unread_count > 0,
+            unread: (t.unread_count || 0) > 0,
             messages: (t.messages || []).map((m: any) => ({
-              id: m.id,
+              id: m.id || Math.random(),
               sender: m.sender_id === hostIdToQuery ? "host" : "guest",
-              senderName: m.sender_name || (m.sender_id === hostIdToQuery ? "You" : t.other_user.full_name),
-              text: m.text,
-              time: m.time,
+              senderName: m.sender_name || (m.sender_id === hostIdToQuery ? "You" : (t.other_user?.full_name || "Guest")),
+              text: m.text || "",
+              time: m.time || (m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "Just now"),
             })),
           }));
           setChatThreads(mapped);
@@ -211,9 +213,6 @@ export default function HostDashboardPage() {
             if (prev && mapped.some((m) => m.id === prev)) return prev;
             return mapped[0].id;
           });
-        } else {
-          setChatThreads([]);
-          setActiveThreadId(null);
         }
       });
     };
@@ -229,6 +228,7 @@ export default function HostDashboardPage() {
   }, [persona.id, persona.role, switchToHosting]);
 
   const handleSwitchToTravelling = () => {
+    isSwitchingToTravellingRef.current = true;
     switchToTravelling();
     router.push("/");
   };

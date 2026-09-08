@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Menu,
   User,
@@ -53,8 +53,15 @@ export default function Navbar({
   onSearch
 }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { persona, switchToHosting, switchToTravelling, isHost, openAuthModal, logout } = useAuthPersona();
   const { openLanguageModal, t } = useLanguageCurrency();
+
+  // Robustly determine if the user is currently in hosting context vs guest/travel context
+  const isHostingRoute = pathname?.startsWith("/hosting") || pathname?.startsWith("/become-a-host");
+  const isGuestTravelRoute = pathname === "/" || pathname?.startsWith("/s/") || pathname?.startsWith("/rooms") || pathname === "/trips" || pathname === "/wishlists";
+  const isCurrentlyHosting = isHostingRoute ? true : isGuestTravelRoute ? false : isHost;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchDeckOpen, setIsSearchDeckOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<"where" | "when" | "who" | null>(null);
@@ -127,7 +134,7 @@ export default function Navbar({
   }, []);
 
   const handleToggleHostRole = () => {
-    if (isHost) {
+    if (isCurrentlyHosting) {
       switchToTravelling();
       router.push("/");
     } else {
@@ -261,7 +268,7 @@ export default function Navbar({
             onClick={handleToggleHostRole}
             className="text-[16px] sm:text-[17px] font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-5 py-3 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
           >
-            {isHost ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
+            {isCurrentlyHosting ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
           </button>
 
           {/* 1. SEPARATE PROFILE LOGO: Clicking directly opens users profile section */}
@@ -328,10 +335,10 @@ export default function Navbar({
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span
                         className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
-                          isHost ? "bg-amber-100 text-amber-800" : "bg-[#FFF0F3] text-[#FF385C]"
+                          isCurrentlyHosting ? "bg-amber-100 text-amber-800" : "bg-[#FFF0F3] text-[#FF385C]"
                         }`}
                       >
-                        {isHost ? "Host" : "Guest"}
+                        {isCurrentlyHosting ? "Host" : "Guest"}
                       </span>
                       <p className="text-[11px] text-[#717171] truncate">{persona.email || "No email"}</p>
                     </div>
@@ -349,7 +356,7 @@ export default function Navbar({
                     className="w-full py-2 px-3 text-xs font-bold rounded-xl bg-[#222222] hover:bg-black text-white transition cursor-pointer text-center flex items-center justify-center gap-1.5 shadow-xs"
                   >
                     <ArrowLeftRight className="w-3.5 h-3.5" />
-                    <span>{isHost ? "Switch to Guest" : "Switch to Host"}</span>
+                    <span>{isCurrentlyHosting ? "Switch to Guest" : "Switch to Host"}</span>
                   </button>
                 </div>
               </div>

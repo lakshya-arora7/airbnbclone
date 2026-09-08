@@ -67,7 +67,26 @@ interface AuthPersonaContextType {
 const AuthPersonaContext = createContext<AuthPersonaContextType | undefined>(undefined);
 
 export function AuthPersonaProvider({ children }: { children: React.ReactNode }) {
-  const [persona, setPersona] = useState<UserPersona>(PRESET_PERSONAS.GUEST);
+  const [persona, setPersona] = useState<UserPersona>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedSession = localStorage.getItem("airbnb_active_user_session");
+        if (savedSession) {
+          const parsed = JSON.parse(savedSession);
+          if (parsed && parsed.id && parsed.role) {
+            return parsed;
+          }
+        }
+        const savedRole = localStorage.getItem("airbnb_demo_persona_role") as UserRole;
+        if (savedRole === "HOST") {
+          return PRESET_PERSONAS.HOST_RAVI;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return PRESET_PERSONAS.GUEST;
+  });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [modalInitialRole, setModalInitialRole] = useState<UserRole>("GUEST");
