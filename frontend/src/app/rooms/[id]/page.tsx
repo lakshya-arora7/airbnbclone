@@ -18,12 +18,14 @@ import {
   Car,
   Utensils,
   AirVent,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from "lucide-react";
 import Navbar from "@/components/header/Navbar";
 import PhotoMosaic from "@/components/room-detail/PhotoMosaic";
 import BookingWidget from "@/components/room-detail/BookingWidget";
 import ReviewsMatrix from "@/components/room-detail/ReviewsMatrix";
+import ContactHostModal from "@/components/room-detail/ContactHostModal";
 import { getCategoryListingById } from "@/data/categoriesData";
 import { api, BookedDateRange } from "@/lib/api";
 import { Listing } from "@/types";
@@ -37,6 +39,7 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(!initialCategoryListing);
   const [blockedDates, setBlockedDates] = useState<BookedDateRange[]>([]);
   const [copied, setCopied] = useState(false);
+  const [isContactHostOpen, setIsContactHostOpen] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
 
   useEffect(() => {
@@ -155,14 +158,25 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-8">
           {/* Left Column: Property & Host Details */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Quick Specs */}
-            <div className="pb-6 border-b border-[#EBEBEB]">
-              <h2 className="text-xl font-bold text-[#222222] mb-1">
-                {listing.propertyType} hosted by {listing.host?.fullName || "Superhost Ravi"}
-              </h2>
-              <p className="text-sm text-[#717171]">
-                {listing.maxGuests} guests · {listing.bedrooms} bedrooms · {listing.beds} beds · {listing.bathrooms} baths
-              </p>
+            {/* Quick Specs & Contact Host */}
+            <div className="pb-6 border-b border-[#EBEBEB] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-[#222222] mb-1">
+                  {listing.propertyType} hosted by {listing.host?.fullName || "Superhost Ravi"}
+                </h2>
+                <p className="text-sm text-[#717171]">
+                  {listing.maxGuests} guests · {listing.bedrooms} bedrooms · {listing.beds} beds · {listing.bathrooms} baths
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsContactHostOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#222222] font-semibold text-sm hover:bg-[#F7F7F7] active:scale-98 transition cursor-pointer self-start sm:self-center shadow-2xs"
+              >
+                <MessageSquare className="w-4 h-4 text-[#FF385C]" />
+                <span>Contact host</span>
+              </button>
             </div>
 
             {/* Highlights */}
@@ -232,6 +246,13 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
 
         {/* Reviews Matrix Component with live database reviews */}
         <ReviewsMatrix listingId={listing.id} rating={listing.rating} reviewCount={listing.reviewCount} />
+
+        {/* Contact Host Modal */}
+        <ContactHostModal
+          isOpen={isContactHostOpen}
+          onClose={() => setIsContactHostOpen(false)}
+          listing={listing}
+        />
       </main>
     </div>
   );

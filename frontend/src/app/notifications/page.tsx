@@ -24,33 +24,70 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [filterTab, setFilterTab] = useState<"all" | "unread">("all");
 
-  useEffect(() => {
+  const loadAllNotifications = React.useCallback(async () => {
     const userId = persona.id || 1;
-    api.getMyTrips(userId).then((trips) => {
-      if (trips && trips.length > 0) {
-        const notifs: NotificationItem[] = trips.map((t: any, idx: number) => ({
-          id: t.id,
+    const [liveNotifs, trips] = await Promise.all([
+      api.getNotifications(userId),
+      api.getMyTrips(userId),
+    ]);
+
+    const combined: NotificationItem[] = [];
+
+    // 1. Live messages & system notifications from database
+    if (Array.isArray(liveNotifs)) {
+      liveNotifs.forEach((n: any) => {
+        combined.push({
+          id: n.id,
+          type: (n.type || "message") as any,
+          title: n.title,
+          description: n.description,
+          time: n.time || new Date(n.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          isRead: n.is_read,
+          linkUrl: n.link_url || "/messages",
+        });
+      });
+    }
+
+    // 2. Booking confirmed notifications
+    if (Array.isArray(trips)) {
+      trips.forEach((t: any) => {
+        combined.push({
+          id: 100000 + t.id,
           type: "booking",
           title: `Reservation ${t.status === "CONFIRMED" ? "Confirmed" : t.status}: ${t.listing?.title || "Property"}`,
           description: `Confirmation #${t.confirmation_code} · ${t.check_in} to ${t.check_out} (${t.total_nights} nights) for ${t.guests_count} guests.`,
           time: new Date(t.created_at || t.check_in).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          isRead: idx > 0,
+          isRead: true,
           linkUrl: "/trips",
-        }));
-        setNotifications(notifs);
-      } else {
-        setNotifications([]);
-      }
-    });
+        });
+      });
+    }
+
+    setNotifications(combined);
   }, [persona.id]);
 
-  const handleMarkAllRead = () => {
+  useEffect(() => {
+    loadAllNotifications();
+
+    const handleUpdate = () => loadAllNotifications();
+    window.addEventListener("airbnb_notifications_updated", handleUpdate);
+    window.addEventListener("airbnb_messages_updated", handleUpdate);
+    return () => {
+      window.removeEventListener("airbnb_notifications_updated", handleUpdate);
+      window.removeEventListener("airbnb_messages_updated", handleUpdate);
+    };
+  }, [loadAllNotifications]);
+
+  const handleMarkAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    await api.markAllNotificationsAsRead(persona.id || 1);
   };
 
-  const handleClearNotifications = () => {
+  const handleClearNotifications = async () => {
     setNotifications([]);
+    await api.clearNotifications(persona.id || 1);
   };
+
 
   const filtered =
     filterTab === "unread" ? notifications.filter((n) => !n.isRead) : notifications;

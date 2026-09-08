@@ -57,7 +57,9 @@ interface MessageItem {
 }
 
 interface ChatThread {
-  id: number;
+  id: any;
+  guestId?: number;
+  listingId?: number;
   guestName: string;
   guestAvatar: string;
   guestRating: number;
@@ -135,7 +137,7 @@ export default function HostDashboardPage() {
   // Messages & Reservations state from live backend
   const [hostReservations, setHostReservations] = useState<any[]>([]);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
-  const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
+  const [activeThreadId, setActiveThreadId] = useState<any | null>(null);
   const [chatFilter, setChatFilter] = useState<"all" | "unread">("all");
   const [chatInput, setChatInput] = useState("");
   const [isHostReservationOpen, setIsHostReservationOpen] = useState(true);
@@ -162,60 +164,57 @@ export default function HostDashboardPage() {
     window.addEventListener("airbnb_listings_updated", handleUpdate);
 
     api.getHostReservations(hostIdToQuery).then((resList) => {
-      const reservations = resList || [];
-      setHostReservations(reservations);
-      if (reservations.length > 0) {
-        const threads: ChatThread[] = reservations.map((res: any) => {
-          const guestName = res.guest?.full_name || `Guest #${res.guest_id}`;
-          const guestAvatar = res.guest?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80";
-          const checkInDate = new Date(res.check_in);
-          const checkOutDate = new Date(res.check_out);
-          return {
-            id: res.id,
-            guestName,
-            guestAvatar,
-            guestRating: 5.0,
-            reservationDates: `${checkInDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${checkOutDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-            checkIn: `${checkInDate.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}`,
-            checkOut: `${checkOutDate.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}`,
-            guestsCount: res.guests_count,
-            listingTitle: res.listing?.title || "Property",
-            totalPayout: res.total_price,
-            confirmationCode: res.confirmation_code,
-            phoneNumber: "+91 98765 43210",
-            lastMessageSnippet: res.status === "COMPLETED" ? "Thank you for hosting me! Left a 5-star review." : `Booking confirmed for ${res.guests_count} guests.`,
-            lastMessageDate: new Date(res.created_at || res.check_in).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-            unread: false,
-            messages: [
-              {
-                id: 1,
-                sender: "system",
-                senderName: "Airbnb",
-                text: `Reservation ${res.status.toLowerCase()} · ${res.confirmation_code} · ${res.total_nights} nights`,
-                time: new Date(res.created_at || res.check_in).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-              },
-              {
-                id: 2,
-                sender: "guest",
-                senderName: guestName.split(" ")[0],
-                text: res.status === "COMPLETED"
-                  ? "Thank you so much for the wonderful stay! Everything was spotless and well organized."
-                  : "Hello! Looking forward to our upcoming stay. Let us know if there are any specific check-in instructions.",
-                time: "Check-in inquiry",
-              }
-            ],
-          };
-        });
-        setChatThreads(threads);
-        setActiveThreadId(threads[0].id);
-      } else {
-        setChatThreads([]);
-        setActiveThreadId(null);
-      }
+      setHostReservations(resList || []);
     });
+
+    const loadLiveMessages = () => {
+      api.getMessagesThreads(hostIdToQuery).then((liveThreads) => {
+        if (liveThreads && liveThreads.length > 0) {
+          const mapped: ChatThread[] = liveThreads.map((t: any) => ({
+            id: t.thread_id,
+            guestId: t.other_user.id,
+            listingId: t.listing?.id,
+            guestName: t.other_user.full_name,
+            guestAvatar: t.other_user.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            guestRating: 5.0,
+            reservationDates: t.listing ? `${t.listing.city}, ${t.listing.country}` : "Direct Message",
+            checkIn: "Check-in info",
+            checkOut: "Check-out info",
+            guestsCount: 2,
+            listingTitle: t.listing?.title || "Property Inquiry",
+            totalPayout: t.listing?.price_per_night || 0,
+            confirmationCode: `TH-${t.thread_id}`,
+            phoneNumber: "+91 98765 43210",
+            lastMessageSnippet: t.last_message || "No messages yet",
+            lastMessageDate: t.last_message_date || "Today",
+            unread: t.unread_count > 0,
+            messages: (t.messages || []).map((m: any) => ({
+              id: m.id,
+              sender: m.sender_id === hostIdToQuery ? "host" : "guest",
+              senderName: m.sender_name || (m.sender_id === hostIdToQuery ? "You" : t.other_user.full_name),
+              text: m.text,
+              time: m.time,
+            })),
+          }));
+          setChatThreads(mapped);
+          setActiveThreadId((prev: any) => {
+            if (prev && mapped.some((m) => m.id === prev)) return prev;
+            return mapped[0].id;
+          });
+        } else {
+          setChatThreads([]);
+          setActiveThreadId(null);
+        }
+      });
+    };
+
+    loadLiveMessages();
+
+    window.addEventListener("airbnb_messages_updated", loadLiveMessages);
 
     return () => {
       window.removeEventListener("airbnb_listings_updated", handleUpdate);
+      window.removeEventListener("airbnb_messages_updated", loadLiveMessages);
     };
   }, [persona.id, persona.role, switchToHosting]);
 
@@ -235,6 +234,19 @@ export default function HostDashboardPage() {
       text: chatInput.trim(),
       time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
     };
+
+    const hostId = persona?.id || 2;
+    const recipientId = activeThread.guestId || 1;
+    const listingId = activeThread.listingId;
+
+    api.sendMessage(
+      {
+        recipientId,
+        listingId,
+        text: chatInput.trim(),
+      },
+      hostId
+    );
 
     setChatThreads((prev) =>
       prev.map((thread) => {

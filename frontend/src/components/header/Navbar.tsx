@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
+import { api } from "@/lib/api";
 import {
   AllGlobeIcon,
   HomesHouseIcon,
@@ -58,8 +59,34 @@ export default function Navbar({
   const [isSearchDeckOpen, setIsSearchDeckOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<"where" | "when" | "who" | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [unreadNotifsCount, setUnreadNotifsCount] = useState(0);
+  const [unreadMsgsCount, setUnreadMsgsCount] = useState(0);
 
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkUnread = async () => {
+      const userId = persona?.id || 1;
+      const [notifs, threads] = await Promise.all([
+        api.getNotifications(userId),
+        api.getMessagesThreads(userId),
+      ]);
+      const unreadN = Array.isArray(notifs) ? notifs.filter((n: any) => !n.is_read).length : 0;
+      const unreadM = Array.isArray(threads) ? threads.reduce((acc: number, t: any) => acc + (t.unread_count || 0), 0) : 0;
+      setUnreadNotifsCount(unreadN);
+      setUnreadMsgsCount(unreadM);
+    };
+
+    checkUnread();
+
+    const handleUpdate = () => checkUnread();
+    window.addEventListener("airbnb_notifications_updated", handleUpdate);
+    window.addEventListener("airbnb_messages_updated", handleUpdate);
+    return () => {
+      window.removeEventListener("airbnb_notifications_updated", handleUpdate);
+      window.removeEventListener("airbnb_messages_updated", handleUpdate);
+    };
+  }, [persona?.id]);
 
   useEffect(() => {
     try {
@@ -260,6 +287,10 @@ export default function Navbar({
                 <User className="w-4 h-4 text-[#FF385C]" />
               )}
             </div>
+            {/* Notification badge */}
+            {(unreadNotifsCount + unreadMsgsCount) > 0 && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#FF385C] rounded-full border-2 border-white ring-1 ring-rose-200" />
+            )}
             {/* Role indicator badge */}
             <span
               className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full hidden sm:inline-block ${
@@ -373,10 +404,15 @@ export default function Navbar({
                 <Link
                   href="/messages"
                   onClick={() => setIsMenuOpen(false)}
-                  className="w-full text-left px-5 py-2.5 text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] flex items-center gap-3 transition"
+                  className="w-full text-left px-5 py-2.5 text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] flex items-center justify-between transition"
                 >
-                  <MessageSquare className="w-4 h-4 text-[#222222]" />
-                  <span>{t("menu.messages", "Messages")}</span>
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-4 h-4 text-[#222222]" />
+                    <span>{t("menu.messages", "Messages")}</span>
+                  </div>
+                  {unreadMsgsCount > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-[#FF385C]" />
+                  )}
                 </Link>
 
                 <Link
@@ -396,10 +432,15 @@ export default function Navbar({
                 <Link
                   href="/notifications"
                   onClick={() => setIsMenuOpen(false)}
-                  className="w-full text-left px-5 py-2.5 text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] flex items-center gap-3 transition"
+                  className="w-full text-left px-5 py-2.5 text-sm font-medium text-[#222222] hover:bg-[#F7F7F7] flex items-center justify-between transition"
                 >
-                  <Bell className="w-4 h-4 text-[#222222]" />
-                  <span>{t("menu.notifications", "Notifications")}</span>
+                  <div className="flex items-center gap-3">
+                    <Bell className="w-4 h-4 text-[#222222]" />
+                    <span>{t("menu.notifications", "Notifications")}</span>
+                  </div>
+                  {unreadNotifsCount > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-[#FF385C]" />
+                  )}
                 </Link>
 
                 <Link

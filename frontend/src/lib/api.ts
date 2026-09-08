@@ -788,4 +788,184 @@ export const api = {
       return [];
     }
   },
+
+  /**
+   * Get user conversation threads (both as guest or host).
+   */
+  async getMessagesThreads(userId: number = 1): Promise<any[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/messages/threads`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const threads = await res.json();
+        return threads;
+      }
+    } catch (err) {
+      console.warn("[API] getMessagesThreads network error:", err);
+    }
+    return [];
+  },
+
+  /**
+   * Send a message to host or guest.
+   */
+  async sendMessage(
+    payload: { recipientId: number; listingId?: number; text: string },
+    senderId: number = 1
+  ): Promise<any> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": senderId.toString(),
+        },
+        body: JSON.stringify({
+          recipient_id: payload.recipientId,
+          listing_id: payload.listingId || null,
+          text: payload.text,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("airbnb_messages_updated"));
+          window.dispatchEvent(new CustomEvent("airbnb_notifications_updated"));
+        }
+        return data;
+      }
+    } catch (err) {
+      console.warn("[API] sendMessage error:", err);
+    }
+    return null;
+  },
+
+  /**
+   * Mark a conversation thread as read.
+   */
+  async markThreadAsRead(threadId: string, userId: number = 1): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/messages/thread/${threadId}/read`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+      });
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  },
+
+  /**
+   * Delete a thread.
+   */
+  async deleteThread(threadId: string, userId: number = 1): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/messages/thread/${threadId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("airbnb_messages_updated"));
+      }
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  },
+
+  /**
+   * Get user notifications.
+   */
+  async getNotifications(userId: number = 1): Promise<any[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      console.warn("[API] getNotifications network error:", err);
+    }
+    return [];
+  },
+
+  /**
+   * Mark single notification as read.
+   */
+  async markNotificationAsRead(notificationId: number, userId: number = 1): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications/${notificationId}/read`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("airbnb_notifications_updated"));
+      }
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  },
+
+  /**
+   * Mark all notifications as read.
+   */
+  async markAllNotificationsAsRead(userId: number = 1): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications/read-all`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("airbnb_notifications_updated"));
+      }
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  },
+
+  /**
+   * Clear all notifications.
+   */
+  async clearNotifications(userId: number = 1): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId.toString(),
+        },
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("airbnb_notifications_updated"));
+      }
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  },
 };
+
