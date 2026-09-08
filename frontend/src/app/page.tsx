@@ -6,7 +6,8 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
 import ListingCard from "@/components/listings/ListingCard";
 import FilterModal from "@/components/filters/FilterModal";
-import FilterRow, { FilterParams } from "@/components/filters/FilterRow";
+import { FilterParams } from "@/types";
+import { MOCK_EXPERIENCES } from "@/data/categoriesData";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import {
@@ -247,10 +248,18 @@ export default function Home() {
     return { location: loc, dates: dt, guests: gst };
   }, [searchParams]);
 
-  // Live experiences from database
+  // Exactly 3 authentic mock experiences (as requested by user)
   const liveExperiences = useMemo(() => {
-    return allListings.filter((l) => l.category === "Experiences");
-  }, [allListings]);
+    if (!searchParams.location) return MOCK_EXPERIENCES;
+    const q = searchParams.location.toLowerCase();
+    const matches = MOCK_EXPERIENCES.filter(
+      (e) =>
+        e.city.toLowerCase().includes(q) ||
+        e.title.toLowerCase().includes(q) ||
+        e.country.toLowerCase().includes(q)
+    );
+    return matches.length > 0 ? matches : MOCK_EXPERIENCES;
+  }, [searchParams.location]);
 
   // All listings with valid coordinates for the interactive map
   const mapListings: Listing[] = useMemo(() => {
@@ -266,17 +275,6 @@ export default function Home() {
         searchSummary={searchSummary}
         onSearch={(params) => setSearchParams(params)}
       />
-
-      {/* Category / Filter Row (Property Type, Price Range, Key Amenities, All Filters Modal) */}
-      <FilterRow
-        filterParams={filterParams}
-        onFilterChange={(newFilters) => setFilterParams(newFilters)}
-        onOpenFilterModal={() => setIsFilterOpen(true)}
-        onClearAll={() => setFilterParams({ amenities: [] })}
-        totalResults={filteredListings.length}
-      />
-
-
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         {/* Active Search Criteria Banner (if user searched via search bar) */}
@@ -408,7 +406,7 @@ export default function Home() {
           /* ========================================================================= */
           /* STANDARD EXPLORE CATEGORY VIEWS (Homes, Experiences, All)                 */
           /* ========================================================================= */
-          <>
+          <div key={activeMode} className="animate-tab-fade transition-all duration-300 ease-out">
             {/* 1. HOMES MODE */}
             {activeMode === "homes" && (
               <>
@@ -610,7 +608,7 @@ export default function Home() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 py-4">
                     {liveExperiences.map((listing) => (
                       <ListingCard key={listing.id} listing={listing} />
                     ))}
@@ -654,7 +652,7 @@ export default function Home() {
                     {liveExperiences.length > 0 && (
                       <div className="pt-6 border-t border-[#EBEBEB]">
                         <h2 className="text-xl font-bold text-[#222222] mb-4">Live Experiences</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
                           {liveExperiences.map((listing) => (
                             <ListingCard key={listing.id} listing={listing} />
                           ))}
@@ -665,7 +663,7 @@ export default function Home() {
                 )}
               </>
             )}
-          </>
+          </div>
         )}
       </main>
 

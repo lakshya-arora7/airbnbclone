@@ -220,3 +220,19 @@ html.dark .bg-\[\#EBEBEB\] {
 .menu-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #717171;
 }
+
+/* Smooth Category/Mode Switching Transitions */
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-tab-fade {
+  animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

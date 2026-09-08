@@ -190,67 +190,73 @@ export default function Navbar({
           </Link>
         </div>
 
-        {/* Column 2 (Center): The 3 Mode Switchers - Simple Pink Icons */}
+        {/* Column 2 (Center): The 3 Mode Switchers - Smooth Animated Pink Icons */}
         <div className="flex items-center justify-center">
           <nav className="flex items-center gap-4 sm:gap-8 h-full">
             {/* All: Simple Pink Globe */}
             <button
               onClick={() => onSelectMode?.("all")}
-              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "all" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
-                activeMode === "all" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+                activeMode === "all" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Globe className="w-4 h-4" strokeWidth={2.2} />
+                <Globe className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.all", "All")}
               </span>
-              {activeMode === "all" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
-              )}
+              <span
+                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                  activeMode === "all" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
+                }`}
+              />
             </button>
 
             {/* Homes: Simple Pink House */}
             <button
               onClick={() => onSelectMode?.("homes")}
-              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "homes" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
-                activeMode === "homes" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+                activeMode === "homes" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Home className="w-4 h-4" strokeWidth={2.2} />
+                <Home className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.homes", "Homes")}
               </span>
-              {activeMode === "homes" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
-              )}
+              <span
+                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                  activeMode === "homes" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
+                }`}
+              />
             </button>
 
             {/* Experiences: Simple Pink Sparkles */}
             <button
               onClick={() => onSelectMode?.("experiences")}
-              className={`flex items-center gap-2 h-full relative transition-all group py-2 cursor-pointer ${
+              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "experiences" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
-                activeMode === "experiences" ? "bg-[#FFF0F3] text-[#FF385C]" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+                activeMode === "experiences" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Sparkles className="w-4 h-4" strokeWidth={2.2} />
+                <Sparkles className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.experiences", "Experiences")}
               </span>
-              {activeMode === "experiences" && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full" />
-              )}
+              <span
+                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                  activeMode === "experiences" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
+                }`}
+              />
             </button>
           </nav>
         </div>
