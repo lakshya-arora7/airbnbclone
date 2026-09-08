@@ -7,9 +7,11 @@ export function getApiBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   if (
-    typeof window !== "undefined" &&
-    window.location.hostname !== "localhost" &&
-    window.location.hostname !== "127.0.0.1"
+    process.env.VERCEL ||
+    process.env.NODE_ENV === "production" ||
+    (typeof window !== "undefined" &&
+      window.location.hostname !== "localhost" &&
+      window.location.hostname !== "127.0.0.1")
   ) {
     return LIVE_RAILWAY_API_URL;
   }
