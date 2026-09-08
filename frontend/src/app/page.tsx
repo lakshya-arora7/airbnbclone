@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
@@ -100,8 +101,9 @@ function CarouselSection({
 }
 
 export default function Home() {
+  const router = useRouter();
   const [allListings, setAllListings] = useState<Listing[]>([]);
-  const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences">("homes");
+  const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences" | "services">("homes");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [showMap, setShowMap] = useState<boolean>(false);
@@ -230,7 +232,13 @@ export default function Home() {
       {/* Header with All, Homes, Experiences Switchers & Interactive Search Deck */}
       <Navbar
         activeMode={activeMode}
-        onSelectMode={(mode) => setActiveMode(mode)}
+        onSelectMode={(mode) => {
+          if (mode === "services") {
+            router.push("/services");
+          } else {
+            setActiveMode(mode);
+          }
+        }}
         searchSummary={searchSummary}
         onSearch={(params) => setSearchParams(params)}
       />

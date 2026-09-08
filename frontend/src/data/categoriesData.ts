@@ -143,9 +143,134 @@ export const MOCK_EXPERIENCES: Listing[] = [
 
 export const TODAY_EXPERIENCES: Listing[] = [MOCK_EXPERIENCES[0], MOCK_EXPERIENCES[2]];
 export const TOMORROW_EXPERIENCES: Listing[] = [MOCK_EXPERIENCES[1]];
-export const SERVICES_LISTINGS: Listing[] = [];
-export const ALL_CATEGORIZED_LISTINGS: Listing[] = MOCK_EXPERIENCES;
+export const SERVICES_LISTINGS: Listing[] = [
+  {
+    id: 301,
+    hostId: 101,
+    host: {
+      id: 101,
+      email: "rohan.photo@airbnb.com",
+      fullName: "Rohan Verma",
+      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      role: "HOST",
+      isSuperhost: true,
+      hostSince: "March 2019",
+      bio: "National Geographic featured photographer specializing in heritage portraiture & travel editorials across Delhi NCR."
+    },
+    title: "New Delhi photo session by professional travel photographer",
+    description: "Capture your unforgettable moments with an editorial photo walk through historic monuments, heritage architecture, and lush gardens of Delhi NCR. Includes 40+ high-res edited digital photos delivered within 48 hours. Perfect for couples, solo travelers, and families.",
+    propertyType: "Photography",
+    category: "Services",
+    city: "Gurgaon",
+    country: "India",
+    latitude: 28.4595,
+    longitude: 77.0266,
+    pricePerNight: 3500,
+    cleaningFee: 0,
+    serviceFeePercent: 14,
+    maxGuests: 6,
+    bedrooms: 0,
+    beds: 0,
+    bathrooms: 0,
+    amenities: ["Professional DSLR & Prime Lenses", "40+ Retouched High-Res Photos", "Posing Direction Included", "Express 48h Digital Delivery", "Wardrobe Consultation"],
+    rating: 4.98,
+    reviewCount: 142,
+    isSuperhost: true,
+    isGuestFavourite: true,
+    isPublished: true,
+    createdAt: "2026-09-08T00:00:00Z",
+    images: [
+      { id: 1, url: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1000&auto=format&fit=crop&q=80", displayOrder: 1, isPrimary: true, caption: "Heritage Portraiture" },
+      { id: 2, url: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=1000&auto=format&fit=crop&q=80", displayOrder: 2, isPrimary: false, caption: "Monument Stroll" },
+      { id: 3, url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1000&auto=format&fit=crop&q=80", displayOrder: 3, isPrimary: false, caption: "Candid Moments" }
+    ]
+  },
+  {
+    id: 302,
+    hostId: 102,
+    host: {
+      id: 102,
+      email: "ananya.chef@airbnb.com",
+      fullName: "Chef Ananya Rao",
+      avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+      role: "HOST",
+      isSuperhost: true,
+      hostSince: "July 2020",
+      bio: "Le Cordon Bleu alumnus with 10+ years in luxury 5-star hospitality, passionate about curated multi-course dining."
+    },
+    title: "Private gourmet chef dining & live cooking experience",
+    description: "Enjoy a personalized 4-course gourmet dining experience in the comfort of your stay. Chef Ananya customizes royal Mughlai, North Indian, or contemporary fusion menus using fresh organic ingredients, complete with table styling and clean-up.",
+    propertyType: "Chefs",
+    category: "Services",
+    city: "Gurgaon",
+    country: "India",
+    latitude: 28.4500,
+    longitude: 77.0800,
+    pricePerNight: 4800,
+    cleaningFee: 0,
+    serviceFeePercent: 14,
+    maxGuests: 8,
+    bedrooms: 0,
+    beds: 0,
+    bathrooms: 0,
+    amenities: ["Customized 4-Course Menu", "Fresh Organic Ingredients", "Tableware & Elegant Setting", "Full Kitchen Clean-up", "Dietary Options Available"],
+    rating: 5.00,
+    reviewCount: 89,
+    isSuperhost: true,
+    isGuestFavourite: true,
+    isPublished: true,
+    createdAt: "2026-09-08T00:00:00Z",
+    images: [
+      { id: 1, url: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1000&auto=format&fit=crop&q=80", displayOrder: 1, isPrimary: true, caption: "Culinary Artistry" },
+      { id: 2, url: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=1000&auto=format&fit=crop&q=80", displayOrder: 2, isPrimary: false, caption: "Chef at Work" },
+      { id: 3, url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=1000&auto=format&fit=crop&q=80", displayOrder: 3, isPrimary: false, caption: "Plated Course" }
+    ]
+  },
+  {
+    id: 303,
+    hostId: 103,
+    host: {
+      id: 103,
+      email: "vikram.trainer@airbnb.com",
+      fullName: "Vikram Malhotra",
+      avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
+      role: "HOST",
+      isSuperhost: false,
+      hostSince: "January 2022",
+      bio: "Certified ACE personal trainer and Ashtanga yoga coach helping travelers maintain their vitality on the road."
+    },
+    title: "Personalized HIIT fitness & morning yoga session",
+    description: "Start your day energized with customized 1-on-1 functional training, strength intervals, and restorative yoga tailored to your fitness level. Mats, resistance bands, and hydration provided.",
+    propertyType: "Training",
+    category: "Services",
+    city: "Gurgaon",
+    country: "India",
+    latitude: 28.4900,
+    longitude: 77.0900,
+    pricePerNight: 1800,
+    cleaningFee: 0,
+    serviceFeePercent: 14,
+    maxGuests: 4,
+    bedrooms: 0,
+    beds: 0,
+    bathrooms: 0,
+    amenities: ["Premium Yoga Mats & Props", "Resistance Bands & Kettlebells", "Personalized Movement Plan", "Post-Workout Hydration", "Sound Bath Relaxation"],
+    rating: 4.95,
+    reviewCount: 64,
+    isSuperhost: false,
+    isGuestFavourite: false,
+    isPublished: true,
+    createdAt: "2026-09-08T00:00:00Z",
+    images: [
+      { id: 1, url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&auto=format&fit=crop&q=80", displayOrder: 1, isPrimary: true, caption: "Morning Training" },
+      { id: 2, url: "https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=1000&auto=format&fit=crop&q=80", displayOrder: 2, isPrimary: false, caption: "Yoga & Breathwork" },
+      { id: 3, url: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=1000&auto=format&fit=crop&q=80", displayOrder: 3, isPrimary: false, caption: "Mobility Stretch" }
+    ]
+  }
+];
+
+export const ALL_CATEGORIZED_LISTINGS: Listing[] = [...MOCK_EXPERIENCES, ...SERVICES_LISTINGS];
 
 export function getCategoryListingById(id: number): Listing | undefined {
-  return MOCK_EXPERIENCES.find((exp) => exp.id === id);
+  return MOCK_EXPERIENCES.find((exp) => exp.id === id) || SERVICES_LISTINGS.find((srv) => srv.id === id);
 }

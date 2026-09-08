@@ -198,6 +198,7 @@ export default function SearchDeck({
   const [children, setChildren] = useState(initialState?.children || 0);
   const [infants, setInfants] = useState(initialState?.infants || 0);
   const [pets, setPets] = useState(initialState?.pets || 0);
+  const [selectedServiceType, setSelectedServiceType] = useState<string>("");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
@@ -430,9 +431,11 @@ export default function SearchDeck({
             }`}
           >
             <div className="truncate min-w-0">
-              <p className="text-[11px] sm:text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
+              <p className="text-[11px] sm:text-[13px] font-extrabold tracking-wide text-[#222222]">
+                {activeMode === "services" ? "Type of service" : t("search.who", "Who")}
+              </p>
               <p className="text-xs sm:text-[15px] font-medium text-[#717171] truncate">
-                {getDisplayGuests()}
+                {activeMode === "services" ? (selectedServiceType || "Add service") : getDisplayGuests()}
               </p>
             </div>
 
@@ -769,7 +772,7 @@ export default function SearchDeck({
               </div>
             </div>
 
-            {/* 3. WHO POPOVER (Matches Screenshot 3: Aligned to Right Edge of Capsule) */}
+            {/* 3. WHO / SERVICES POPOVER */}
             <div
               className={`absolute top-0 right-0 w-[420px] max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto overscroll-contain bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-4 sm:p-6 transition-all duration-300 ease-out origin-top-right menu-scrollbar ${
                 activeTab === "who"
@@ -777,7 +780,54 @@ export default function SearchDeck({
                   : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
               }`}
             >
-              <div className="space-y-6">
+              {activeMode === "services" ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-3">
+                    <h5 className="font-bold text-sm text-[#222222]">Select Type of Service</h5>
+                    {selectedServiceType && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedServiceType("")}
+                        className="text-xs font-semibold text-[#717171] underline hover:text-[#222222]"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { name: "Photography", desc: "Portraits, couples, events & street sessions" },
+                      { name: "Chefs", desc: "Private gourmet dining, multi-course meals & live cooking" },
+                      { name: "Training", desc: "Personal fitness coaches, yoga & HIIT sessions" },
+                      { name: "Make-up", desc: "Glamour, bridal, editorial & evening make-up" },
+                      { name: "Hair", desc: "Blowouts, styling, cutting & personalized hair care" },
+                    ].map((svc) => (
+                      <button
+                        key={svc.name}
+                        type="button"
+                        onClick={() => {
+                          setSelectedServiceType(svc.name);
+                          onClose();
+                        }}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl border text-left transition ${
+                          selectedServiceType === svc.name
+                            ? "border-[#222222] bg-[#F7F7F7] font-semibold"
+                            : "border-[#EBEBEB] hover:border-[#222222] hover:bg-[#F7F7F7]/60"
+                        }`}
+                      >
+                        <div>
+                          <div className="font-bold text-sm text-[#222222]">{svc.name}</div>
+                          <div className="text-xs text-[#717171] mt-0.5">{svc.desc}</div>
+                        </div>
+                        {selectedServiceType === svc.name && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#FF385C] flex-shrink-0 ml-3" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
                 {/* Adults */}
                 <div className="flex items-center justify-between pb-5 border-b border-[#EBEBEB]">
                   <div>
@@ -876,6 +926,7 @@ export default function SearchDeck({
                   </div>
                 </div>
               </div>
+            )}
             </div>
           </div>
         </div>

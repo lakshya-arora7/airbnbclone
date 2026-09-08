@@ -26,13 +26,14 @@ import { api } from "@/lib/api";
 import {
   AllGlobeIcon,
   HomesHouseIcon,
-  ExperiencesBalloonIcon
+  ExperiencesBalloonIcon,
+  ServicesBellIcon
 } from "./CategoryIcons";
 import SearchDeck, { SearchState } from "../search/SearchDeck";
 
 interface NavbarProps {
-  activeMode?: "all" | "homes" | "experiences";
-  onSelectMode?: (mode: "all" | "homes" | "experiences") => void;
+  activeMode?: "all" | "homes" | "experiences" | "services";
+  onSelectMode?: (mode: "all" | "homes" | "experiences" | "services") => void;
   searchSummary?: {
     location?: string;
     dates?: string;
@@ -196,7 +197,13 @@ export default function Navbar({
           <nav className="flex items-center gap-2 sm:gap-6 md:gap-11 h-full">
             {/* All: Globe */}
             <button
-              onClick={() => onSelectMode?.("all")}
+              onClick={() => {
+                if (pathname === "/services") {
+                  router.push("/?mode=all");
+                } else {
+                  onSelectMode?.("all");
+                }
+              }}
               className={`flex items-center gap-1.5 sm:gap-3 h-full relative transition-all duration-300 ease-out group py-1.5 sm:py-2.5 cursor-pointer ${
                 activeMode === "all" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
@@ -218,7 +225,13 @@ export default function Navbar({
 
             {/* Homes: House */}
             <button
-              onClick={() => onSelectMode?.("homes")}
+              onClick={() => {
+                if (pathname === "/services") {
+                  router.push("/?mode=homes");
+                } else {
+                  onSelectMode?.("homes");
+                }
+              }}
               className={`flex items-center gap-1.5 sm:gap-3 h-full relative transition-all duration-300 ease-out group py-1.5 sm:py-2.5 cursor-pointer ${
                 activeMode === "homes" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
@@ -240,7 +253,13 @@ export default function Navbar({
 
             {/* Experiences: Sparkles */}
             <button
-              onClick={() => onSelectMode?.("experiences")}
+              onClick={() => {
+                if (pathname === "/services") {
+                  router.push("/?mode=experiences");
+                } else {
+                  onSelectMode?.("experiences");
+                }
+              }}
               className={`flex items-center gap-1.5 sm:gap-3 h-full relative transition-all duration-300 ease-out group py-1.5 sm:py-2.5 cursor-pointer ${
                 activeMode === "experiences" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
@@ -256,6 +275,34 @@ export default function Navbar({
               <span
                 className={`absolute -bottom-1 left-0 right-0 h-[3.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "experiences" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
+                }`}
+              />
+            </button>
+
+            {/* Services: Bell Cloche (Next to Experiences) */}
+            <button
+              onClick={() => {
+                if (pathname === "/services") {
+                  onSelectMode?.("services");
+                } else {
+                  router.push("/services");
+                }
+              }}
+              className={`flex items-center gap-1.5 sm:gap-3 h-full relative transition-all duration-300 ease-out group py-1.5 sm:py-2.5 cursor-pointer ${
+                activeMode === "services" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
+              }`}
+            >
+              <div className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+                activeMode === "services" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
+              }`}>
+                <ServicesBellIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 transition-transform duration-300" />
+              </div>
+              <span className={`hidden sm:inline text-[15px] md:text-[18px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "services" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+                {t("nav.services", "Services")}
+              </span>
+              <span
+                className={`absolute -bottom-1 left-0 right-0 h-[3.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                  activeMode === "services" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
             </button>

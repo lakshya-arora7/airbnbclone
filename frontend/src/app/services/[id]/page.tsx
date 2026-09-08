@@ -68,7 +68,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white text-[#222222]">
       {/* Top Navbar */}
-      <Navbar activeMode="all" />
+      <Navbar activeMode="services" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -87,7 +87,7 @@ export default function ServiceDetailPage({ params }: PageProps) {
           <div className="lg:col-span-5 space-y-6">
             <div className="space-y-3">
               <span className="text-[11px] font-bold tracking-wider uppercase text-[#008489] bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-                Airbnb Services
+                bnbair Services
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#222222] tracking-tight leading-tight">
                 {service.title}
