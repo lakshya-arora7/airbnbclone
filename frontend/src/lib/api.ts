@@ -967,5 +967,25 @@ export const api = {
       return false;
     }
   },
+
+  /**
+   * Upload an image file to backend/cloud storage (Bonus Feature: Image upload)
+   */
+  async uploadImage(file: File): Promise<{ filename: string; url: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${getApiBaseUrl()}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to upload image file");
+    }
+    const data = await res.json();
+    const fullUrl = data.url.startsWith("http")
+      ? data.url
+      : `${getApiBaseUrl().replace("/api/v1", "")}${data.url}`;
+    return { ...data, url: fullUrl };
+  },
 };
 

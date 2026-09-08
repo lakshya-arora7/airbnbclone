@@ -27,6 +27,7 @@ import {
   FileText,
   Lock,
   Eye,
+  Upload,
 } from "lucide-react";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
@@ -131,6 +132,28 @@ export default function CreateListingModal({
     if (!customPhotoUrl.trim()) return;
     setPhotos((prev) => [...prev, customPhotoUrl.trim()]);
     setCustomPhotoUrl("");
+  };
+
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  // Upload photo from device (Bonus Feature: Image upload to storage)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setErrorMsg(null);
+    try {
+      const res = await api.uploadImage(file);
+      if (res.url) {
+        setPhotos((prev) => [...prev, res.url]);
+      }
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setErrorMsg("Failed to upload image file. Please try a valid image format.");
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
   };
 
   // Remove photo
@@ -823,6 +846,27 @@ export default function CreateListingModal({
                     );
                   })}
                 </div>
+              </div>
+
+              {/* File Upload Option (Bonus Feature: Image Upload to Storage) */}
+              <div className="p-3 bg-[#F9F9F9] rounded-2xl border border-[#EBEBEB] space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-[#222222]">
+                    Upload Image File from Device
+                  </label>
+                  <span className="text-[10px] text-[#717171] font-medium">PNG, JPG, WebP</span>
+                </div>
+                <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-dashed border-[#DDDDDD] hover:border-[#222222] rounded-xl text-xs font-bold text-[#222222] cursor-pointer transition">
+                  <Upload className="w-4 h-4 text-[#FF385C]" />
+                  <span>{isUploading ? "Uploading image..." : "Choose image file to upload"}</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                </label>
               </div>
 
               {/* Custom Photo URL Input */}
