@@ -43,7 +43,6 @@ import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import CreateListingModal from "@/components/hosting/CreateListingModal";
 import EditListingModal from "@/components/hosting/EditListingModal";
-import ModifyBookingModal from "@/components/hosting/ModifyBookingModal";
 import ListingBookingsModal from "@/components/hosting/ListingBookingsModal";
 
 type HostTab = "today" | "calendar" | "listings" | "messages";
@@ -131,8 +130,6 @@ export default function HostDashboardPage() {
   const [isEditListingModalOpen, setIsEditListingModalOpen] = useState<boolean>(false);
   const [activeListingForBookings, setActiveListingForBookings] = useState<Listing | null>(null);
   const [isListingBookingsModalOpen, setIsListingBookingsModalOpen] = useState<boolean>(false);
-  const [editingBooking, setEditingBooking] = useState<any | null>(null);
-  const [isModifyBookingModalOpen, setIsModifyBookingModalOpen] = useState<boolean>(false);
 
   // Messages & Reservations state from live backend
   const [hostReservations, setHostReservations] = useState<any[]>([]);
@@ -303,21 +300,6 @@ export default function HostDashboardPage() {
   const handleOpenListingBookings = (listing: Listing) => {
     setActiveListingForBookings(listing);
     setIsListingBookingsModalOpen(true);
-  };
-
-  const handleOpenModifyBooking = (booking: any) => {
-    setEditingBooking(booking);
-    setIsModifyBookingModalOpen(true);
-  };
-
-  const handleBookingUpdated = (updated: any) => {
-    setHostReservations((prev) =>
-      prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b))
-    );
-    setSuccessToast(
-      `Reservation #${updated.confirmation_code || updated.confirmationCode} updated successfully!`
-    );
-    setTimeout(() => setSuccessToast(null), 5000);
   };
 
   const filteredThreads = chatFilter === "unread"
@@ -557,13 +539,9 @@ export default function HostDashboardPage() {
                           <p className="text-[11px] text-[#717171] font-semibold uppercase">{booking.status}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleOpenModifyBooking(booking)}
-                            className="text-xs font-bold text-sky-700 underline hover:text-sky-900 cursor-pointer flex items-center gap-1"
-                          >
-                            <Edit3 className="w-3 h-3" />
-                            <span>Modify booking</span>
-                          </button>
+                          <span className="text-[11px] text-[#717171] font-semibold bg-[#F7F7F7] px-2.5 py-1 rounded-full border border-[#EBEBEB]">
+                            Fixed dates
+                          </span>
                           <button
                             onClick={() => {
                               setActiveTab("messages");
@@ -1765,25 +1743,12 @@ export default function HostDashboardPage() {
         hostId={persona.id || 2}
       />
 
-      {/* 9. Listing Bookings Modal */}
+      {/* 9. Listing Bookings Modal (Fixed Dates & Records) */}
       <ListingBookingsModal
         isOpen={isListingBookingsModalOpen}
         listing={activeListingForBookings}
         onClose={() => setIsListingBookingsModalOpen(false)}
-        onModifyBooking={(booking) => {
-          setIsListingBookingsModalOpen(false);
-          handleOpenModifyBooking(booking);
-        }}
         hostId={persona.id || 2}
-      />
-
-      {/* 10. Modify Booking Modal */}
-      <ModifyBookingModal
-        isOpen={isModifyBookingModalOpen}
-        booking={editingBooking}
-        onClose={() => setIsModifyBookingModalOpen(false)}
-        onSuccess={handleBookingUpdated}
-        userId={persona.id || 2}
       />
     </div>
   );

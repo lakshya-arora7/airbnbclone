@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Calendar, Users, Edit3, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { X, Calendar, Users, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Listing } from "@/types";
 import { api } from "@/lib/api";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
@@ -10,7 +10,7 @@ interface ListingBookingsModalProps {
   isOpen: boolean;
   listing: Listing | null;
   onClose: () => void;
-  onModifyBooking: (booking: any) => void;
+  onModifyBooking?: (booking: any) => void;
   hostId: number;
 }
 
@@ -18,7 +18,6 @@ export default function ListingBookingsModal({
   isOpen,
   listing,
   onClose,
-  onModifyBooking,
   hostId,
 }: ListingBookingsModalProps) {
   const { formatPrice } = useLanguageCurrency();
@@ -92,7 +91,9 @@ export default function ListingBookingsModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs text-[#717171] font-semibold px-1">
                 <span>{bookings.length} {bookings.length === 1 ? "Reservation" : "Reservations"} Found</span>
-                <span>Click modify to update dates or guests</span>
+                <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[11px] font-bold border border-emerald-200">
+                  Fixed Dates & Status
+                </span>
               </div>
 
               {bookings.map((b) => {
@@ -151,16 +152,10 @@ export default function ListingBookingsModal({
                         </p>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onModifyBooking(b);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#222222] text-white text-xs font-bold hover:bg-black transition cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Modify</span>
-                      </button>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F7F7F7] text-[#717171] border border-[#EBEBEB] text-[11px] font-semibold">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span>Fixed</span>
+                      </span>
                     </div>
                   </div>
                 );

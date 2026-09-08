@@ -6,10 +6,9 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
-import { Calendar, MapPin, AlertCircle, CheckCircle, ArrowRight, X, Sparkles, Star, Edit3 } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Star } from "lucide-react";
 import { api } from "@/lib/api";
 import ReviewModal from "@/components/reviews/ReviewModal";
-import ModifyBookingModal from "@/components/hosting/ModifyBookingModal";
 
 // Dynamically import Leaflet World Map with SSR disabled
 const TripsWorldMap = dynamic(() => import("@/components/map/TripsWorldMap"), {
@@ -43,9 +42,7 @@ export default function MyTripsPage() {
   const { persona } = useAuthPersona();
   const { formatPrice, t } = useLanguageCurrency();
   const [trips, setTrips] = useState<TripRecord[]>([]);
-  const [cancellingTripId, setCancellingTripId] = useState<number | null>(null);
   const [reviewingTrip, setReviewingTrip] = useState<TripRecord | null>(null);
-  const [modifyingTrip, setModifyingTrip] = useState<TripRecord | null>(null);
   const [userReviews, setUserReviews] = useState<Record<number, any>>({});
 
   const loadUserReviews = async () => {
@@ -107,23 +104,6 @@ export default function MyTripsPage() {
     // Fetch user's reviews
     loadUserReviews();
   }, [persona.id]);
-
-  const handleCancelTrip = async (tripId: number) => {
-    // 1. Call live backend cancellation
-    await api.cancelBooking(tripId, persona.id || 1);
-
-    // 2. Update local state
-    const updated = trips.map((t) =>
-      t.id === tripId ? { ...t, status: "CANCELLED" as const } : t
-    );
-    setTrips(updated);
-    try {
-      localStorage.setItem("airbnb_demo_bookings", JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
-    setCancellingTripId(null);
-  };
 
   return (
     <div className="min-h-screen bg-white text-[#222222] flex flex-col">
@@ -242,16 +222,19 @@ export default function MyTripsPage() {
                             <span>{trip.city}, {trip.country}</span>
                           </p>
 
-                          <div className="mt-2 text-xs font-semibold text-[#222222] flex items-center gap-1.5">
+                          <div className="mt-2 text-xs font-semibold text-[#222222] flex items-center gap-1.5 flex-wrap">
                             <Calendar className="w-3.5 h-3.5 text-[#717171]" />
                             <span>{trip.checkIn} – {trip.checkOut}</span>
+                            <span className="text-[10px] text-[#717171] bg-[#F7F7F7] px-2 py-0.5 rounded-md border border-[#EBEBEB] font-medium">
+                              Fixed dates
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Posted User Review Display Card */}
                       {userReview && (
-                        <div className="p-3.5 bg-[#FFF8F6] border border-[#FFE4E8] rounded-2xl space-y-2">
+                        <div className="p-3.5 bg-[#FFF8F6] border border-[#FFE4E8] rounded-2xl space-y-2 animate-in fade-in duration-300">
                           <div className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2">
                               <span className="bg-[#FF385C] text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider shadow-xs">
@@ -288,40 +271,19 @@ export default function MyTripsPage() {
                             <button
                               type="button"
                               onClick={() => setReviewingTrip(trip)}
-                              className="font-bold text-[#FF385C] hover:underline cursor-pointer flex items-center gap-1 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200 transition shadow-2xs"
+                              className="group inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#FF385C] to-[#E00B41] hover:from-[#E00B41] hover:to-[#D70466] shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 cursor-pointer"
                             >
-                              <Star className="w-3.5 h-3.5 fill-[#FF385C]" />
-                              <span>{userReview ? "Edit review" : "Leave a review"}</span>
+                              <Star className="w-3.5 h-3.5 fill-white text-white group-hover:rotate-12 transition-transform duration-200" />
+                              <span>{userReview ? "Edit your review" : "Leave a review"}</span>
                             </button>
                           )}
 
                           <Link
                             href={`/rooms/${trip.listingId}`}
-                            className="font-semibold text-[#222222] hover:underline"
+                            className="font-semibold text-[#222222] hover:text-[#FF385C] hover:underline transition-colors"
                           >
                             View stay
                           </Link>
-
-                          {/* Modify & Cancel are only available for CONFIRMED trips */}
-                          {isConfirmed && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => setModifyingTrip(trip)}
-                                className="font-semibold text-sky-700 hover:underline cursor-pointer flex items-center gap-1"
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                                <span>Modify</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setCancellingTripId(trip.id)}
-                                className="text-rose-600 hover:underline cursor-pointer font-medium"
-                              >
-                                Cancel
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -362,35 +324,6 @@ export default function MyTripsPage() {
         </div>
       </main>
 
-      {/* Cancel Trip Confirmation Modal */}
-      {cancellingTripId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-[#DDDDDD] space-y-4">
-            <h3 className="text-lg font-bold text-[#222222]">Cancel reservation?</h3>
-            <p className="text-xs text-[#717171] leading-relaxed">
-              Are you sure you want to cancel this reservation? Full refund will be processed to
-              your original payment method within 3–5 business days under Flexible cancellation policy.
-            </p>
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setCancellingTripId(null)}
-                className="px-4 py-2 text-xs font-semibold rounded-full border border-[#DDDDDD] hover:bg-[#F7F7F7] cursor-pointer"
-              >
-                Keep reservation
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCancelTrip(cancellingTripId)}
-                className="px-4 py-2 text-xs font-semibold rounded-full bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
-              >
-                Confirm cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Leave / Edit Review Modal */}
       {reviewingTrip && (
         <ReviewModal
@@ -407,35 +340,17 @@ export default function MyTripsPage() {
           initialCommunication={userReviews[reviewingTrip.listingId]?.communication}
           initialLocation={userReviews[reviewingTrip.listingId]?.location}
           initialValue={userReviews[reviewingTrip.listingId]?.value}
-          onReviewSubmitted={() => {
+          onReviewSubmitted={(savedReview) => {
+            if (savedReview) {
+              setUserReviews((prev) => ({
+                ...prev,
+                [savedReview.listingId]: savedReview,
+              }));
+            }
             loadUserReviews();
           }}
         />
       )}
-      {/* Modify Booking Modal */}
-      <ModifyBookingModal
-        isOpen={!!modifyingTrip}
-        booking={modifyingTrip}
-        onClose={() => setModifyingTrip(null)}
-        onSuccess={(updated) => {
-          setTrips((prev) =>
-            prev.map((t) =>
-              t.id === updated.id
-                ? {
-                    ...t,
-                    checkIn: updated.check_in || updated.checkIn,
-                    checkOut: updated.check_out || updated.checkOut,
-                    guestsCount: updated.guests_count || updated.guestsCount,
-                    totalPrice: updated.total_price || updated.totalPrice,
-                    status: updated.status || t.status,
-                  }
-                : t
-            )
-          );
-          setModifyingTrip(null);
-        }}
-        userId={persona.id || 1}
-      />
     </div>
   );
 }
