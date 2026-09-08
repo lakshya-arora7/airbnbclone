@@ -25,6 +25,7 @@ def test_all_bonus_features():
     print("VERIFYING ALL 6 BONUS (OPTIONAL) FEATURES FROM ASSIGNMENT DOCUMENT")
     print("=" * 75)
     results = []
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
     # -------------------------------------------------------------------------
     # BONUS FEATURE 1: Interactive Map with Listing Pins
@@ -98,11 +99,13 @@ def test_all_bonus_features():
     # BONUS FEATURE 5: Dark Mode
     # -------------------------------------------------------------------------
     print("\n--- 5. Testing Bonus 5: Dark Mode ---")
-    with open("frontend/src/app/globals.css", "r", encoding="utf-8") as f:
+    globals_css_path = os.path.join(repo_root, "frontend", "src", "app", "globals.css")
+    navbar_tsx_path = os.path.join(repo_root, "frontend", "src", "components", "header", "Navbar.tsx")
+    with open(globals_css_path, "r", encoding="utf-8") as f:
         css = f.read()
     assert "html.dark" in css, "Dark mode root styling missing in globals.css"
     assert "html.dark body" in css, "Dark mode body theme missing in globals.css"
-    with open("frontend/src/components/header/Navbar.tsx", "r", encoding="utf-8") as f:
+    with open(navbar_tsx_path, "r", encoding="utf-8") as f:
         navbar = f.read()
     assert "handleToggleDarkMode" in navbar, "Dark mode toggle handler missing in Navbar"
     assert "airbnb_theme" in navbar, "Dark mode theme persistence missing in Navbar"
@@ -113,12 +116,14 @@ def test_all_bonus_features():
     # BONUS FEATURE 6: Responsive Design (Mobile, Tablet, Desktop)
     # -------------------------------------------------------------------------
     print("\n--- 6. Testing Bonus 6: Responsive Design (Mobile, Tablet, Desktop) ---")
-    with open("frontend/src/app/page.tsx", "r", encoding="utf-8") as f:
+    page_path = os.path.join(repo_root, "frontend", "src", "app", "page.tsx")
+    with open(page_path, "r", encoding="utf-8") as f:
         page_code = f.read()
     # Check responsive Tailwind breakpoints
     assert "grid-cols-1 sm:grid-cols-2" in page_code, "Grid missing mobile / tablet responsive classes"
     assert "lg:grid-cols-4 2xl:grid-cols-5" in page_code, "Grid missing desktop responsive classes"
-    with open("frontend/src/app/rooms/[id]/page.tsx", "r", encoding="utf-8") as f:
+    room_path = os.path.join(repo_root, "frontend", "src", "app", "rooms", "[id]", "page.tsx")
+    with open(room_path, "r", encoding="utf-8") as f:
         room_code = f.read()
     assert "grid-cols-1 lg:grid-cols-3" in room_code, "Detail page missing responsive layout split"
     print(f"{PASS} 6.1 Responsive design verified: sm: (tablet), lg: (desktop), 2xl: (large displays), flex-col (mobile)")

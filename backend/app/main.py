@@ -8,27 +8,21 @@ from app.core.config import settings
 from app.db.base import Base
 from app.db.session import engine, SessionLocal
 from app.api.v1.api import api_router
-from app.models.listing import Listing
-import seed
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. Initialize SQLite tables
     Base.metadata.create_all(bind=engine)
 
-    # 2. Ensure initial auth personas exist if users table is empty
+    # 2. Ensure initial seed data exists if listings table is empty
     db = SessionLocal()
     try:
-        from app.models.user import User
-        if db.query(User).count() == 0:
-            seed.seed_personas(db)
-
         from app.models.listing import Listing
         if db.query(Listing).count() == 0:
-            from seed_5_sample_listings import seed_five_sample_listings
-            seed_five_sample_listings(db)
+            from app.db.seed_data import seed_database
+            seed_database(db)
     except Exception as e:
-        print(f"[Startup] Error during initialization: {e}")
+        print(f"[Startup] Error during database initialization: {e}")
     finally:
         db.close()
 
