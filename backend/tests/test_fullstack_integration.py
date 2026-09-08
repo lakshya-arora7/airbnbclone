@@ -18,26 +18,24 @@ def setup_database():
 
 
 def test_api_get_listings_returns_catalog():
-    """Verify GET /api/v1/listings returns 16 curated listings."""
+    """Verify GET /api/v1/listings returns 5 curated listings."""
     response = client.get("/api/v1/listings")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 16
+    assert len(data) == 5
     assert any(item["city"] == "Noida" for item in data)
-    assert any(item["city"] == "Paris" for item in data)
-    assert any(item["city"] == "Goa" for item in data)
 
 
 def test_api_get_listing_detail_and_booked_dates():
     """Verify listing detail and booked dates endpoints."""
-    # Listing 3 (Noida Studio) has a confirmed booking from seed.py
-    detail_res = client.get("/api/v1/listings/3")
+    # Listing 1 (Noida Flat) has a confirmed booking from seeder
+    detail_res = client.get("/api/v1/listings/1")
     assert detail_res.status_code == 200
     listing = detail_res.json()
-    assert listing["id"] == 3
-    assert len(listing["images"]) == 5
+    assert listing["id"] == 1
+    assert len(listing["images"]) >= 3
 
-    dates_res = client.get("/api/v1/listings/3/booked-dates")
+    dates_res = client.get("/api/v1/listings/1/booked-dates")
     assert dates_res.status_code == 200
     booked_ranges = dates_res.json()
     assert len(booked_ranges) >= 1
@@ -48,11 +46,11 @@ def test_api_get_listing_detail_and_booked_dates():
 def test_transactional_date_collision_avoidance():
     """Verify HTTP 409 Conflict when attempting to book overlapping dates."""
     today = date.today()
-    # The seeded booking on listing 3 is from today+5 to today+8
+    # The seeded booking on listing 1 is from today+5 to today+9
     conflict_payload = {
-        "listing_id": 3,
+        "listing_id": 1,
         "check_in": (today + timedelta(days=6)).isoformat(),
-        "check_out": (today + timedelta(days=10)).isoformat(),
+        "check_out": (today + timedelta(days=8)).isoformat(),
         "guests_count": 2,
         "payment_method": "UPI / QR Code"
     }

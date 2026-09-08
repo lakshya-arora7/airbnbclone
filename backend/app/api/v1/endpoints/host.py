@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.listing import ListingResponse
+from app.schemas.listing import ListingCreate, ListingUpdate, ListingResponse
 from app.schemas.booking import BookingResponse
 from app.services.host_service import get_host_listings, get_host_reservations, get_host_stats
 from app.api.v1.endpoints.auth import get_current_user
@@ -35,3 +35,33 @@ def host_analytics(
     db: Session = Depends(get_db)
 ):
     return get_host_stats(db, current_user.id)
+
+@router.post("/listings", response_model=ListingResponse, status_code=201)
+def host_create_listing(
+    payload: ListingCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    from app.api.v1.endpoints.listings import create_listing
+    return create_listing(payload, current_user, db)
+
+@router.put("/listings/{id}", response_model=ListingResponse)
+def host_update_listing(
+    id: int,
+    payload: ListingUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    from app.api.v1.endpoints.listings import update_listing
+    return update_listing(id, payload, current_user, db)
+
+@router.delete("/listings/{id}")
+def host_delete_listing(
+    id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    from app.api.v1.endpoints.listings import delete_listing
+    delete_listing(id, current_user, db)
+    return {"message": "Listing deleted successfully", "id": id}
+

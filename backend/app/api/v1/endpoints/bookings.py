@@ -67,6 +67,42 @@ from datetime import date
 from typing import Optional
 from pydantic import BaseModel
 
+class PriceCalculationRequest(BaseModel):
+    listing_id: int
+    check_in: date
+    check_out: date
+
+@router.post("/calculate-price")
+def calculate_booking_price(
+    payload: PriceCalculationRequest,
+    db: Session = Depends(get_db)
+):
+    from app.models.listing import Listing
+    from app.services.pricing_engine import PricingEngine
+    from fastapi import HTTPException
+    
+    listing = db.query(Listing).filter(Listing.id == payload.listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found.")
+    
+    total_nights = (payload.check_out - payload.check_in).days
+    if total_nights <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Checkout must be after checkin.")
+
+    pricing = PricingEngine.calculate_stay_pricing(
+        price_per_night=listing.price_per_night,
+        cleaning_fee=listing.cleaning_fee or 0.0,
+        total_nights=total_nights,
+        custom_service_fee_percent=listing.service_fee_percent
+    )
+    return {
+        "listing_id": listing.id,
+        "check_in": payload.check_in,
+        "check_out": payload.check_out,
+        "nightly_rate": listing.price_per_night,
+        **pricing
+    }
+
 class BookingUpdate(BaseModel):
     check_in: Optional[date] = None
     check_out: Optional[date] = None
@@ -95,6 +131,7 @@ def get_bookings_for_listing(
     ).order_by(Booking.check_in.desc()).all()
     return [serialize_booking(b) for b in bookings]
 
+@router.put("/{id}", response_model=BookingResponse)
 @router.patch("/{id}", response_model=BookingResponse)
 def update_booking(
     id: int,
@@ -102,6 +139,7 @@ def update_booking(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    from fastapi import HTTPException
     booking = db.query(Booking).filter(Booking.id == id).first()
     if not booking:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found.")
@@ -125,6 +163,7 @@ def update_booking(
     db.refresh(booking)
     return serialize_booking(booking)
 
+@router.post("/{id}/cancel", response_model=BookingResponse)
 @router.patch("/{id}/cancel", response_model=BookingResponse)
 def cancel_reservation(
     id: int,
