@@ -324,11 +324,11 @@ export default function HostDashboardPage() {
       {/* ========================================================================= */}
       {/* 1. TOP HOST NAVBAR MATCHING SCREENSHOTS 1, 2, 3, 4                        */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-4 sm:px-8 h-20 grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-4 sm:px-8 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
         {/* Left: Brand Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
-            <span className="font-extrabold text-[24px] sm:text-[26px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+            <span className="font-extrabold text-[29px] sm:text-[33px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
               bnbair
             </span>
           </Link>
@@ -336,7 +336,7 @@ export default function HostDashboardPage() {
 
         {/* Center: The 4 Host Tabs (Today, Calendar, Listings, Messages) - Perfectly Centered */}
         <div className="flex items-center justify-center">
-          <nav className="flex items-center gap-6 sm:gap-10 h-full">
+          <nav className="flex items-center gap-7 sm:gap-11 h-full">
             {(["today", "calendar", "listings", "messages"] as HostTab[]).map((tab) => {
               const isActive = activeTab === tab;
               const labelMap: Record<HostTab, string> = {
@@ -350,13 +350,13 @@ export default function HostDashboardPage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-2 text-sm font-semibold relative transition cursor-pointer ${
-                    isActive ? "text-[#222222]" : "text-[#717171] hover:text-[#222222]"
+                  className={`py-2.5 text-[16px] sm:text-[17px] font-semibold relative transition cursor-pointer ${
+                    isActive ? "text-[#222222] font-bold" : "text-[#717171] hover:text-[#222222]"
                   }`}
                 >
                   <span>{labelMap[tab]}</span>
                   {isActive && (
-                    <span className="absolute -bottom-3 left-0 right-0 h-[2.5px] bg-[#222222] rounded-full" />
+                    <span className="absolute -bottom-3 left-0 right-0 h-[3px] bg-[#222222] rounded-full" />
                   )}
                 </button>
               );
@@ -365,23 +365,23 @@ export default function HostDashboardPage() {
         </div>
 
         {/* Right Section: Switch to travelling & Persona Avatar */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 sm:gap-4">
           <button
             onClick={handleSwitchToTravelling}
-            className="text-sm font-semibold text-[#222222] hover:bg-[#F7F7F7] px-4 py-2 rounded-full transition cursor-pointer hidden sm:inline-block"
+            className="text-[16px] sm:text-[17px] font-semibold text-[#222222] hover:bg-[#F7F7F7] px-5 py-3 rounded-full transition cursor-pointer hidden sm:inline-block"
           >
             Switch to travelling
           </button>
 
           <Link
             href="/profile"
-            className="w-9 h-9 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] cursor-pointer hover:ring-2 hover:ring-[#222222] transition block"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] cursor-pointer hover:ring-2 hover:ring-[#222222] transition block"
             title="Profile"
           >
             {persona.avatarUrl ? (
               <img src={persona.avatarUrl} alt={persona.fullName} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center font-bold text-xs">
+              <div className="w-full h-full flex items-center justify-center font-bold text-sm">
                 {persona.fullName[0]}
               </div>
             )}

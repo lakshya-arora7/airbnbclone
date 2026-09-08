@@ -174,11 +174,11 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       {/* Top Row: Symmetrical 3-Column Layout (1fr auto 1fr) for Perfect Center Alignment */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 grid grid-cols-[1fr_auto_1fr] items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center">
         {/* Column 1 (Left): Brand Name "bnbair" */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
-            <span className="font-extrabold text-[26px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+            <span className="font-extrabold text-[29px] sm:text-[33px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
               bnbair
             </span>
           </Link>
@@ -186,24 +186,24 @@ export default function Navbar({
 
         {/* Column 2 (Center): The 3 Mode Switchers - Symmetrical & Enlarged */}
         <div className="flex items-center justify-center">
-          <nav className="flex items-center gap-5 sm:gap-9 h-full">
+          <nav className="flex items-center gap-6 sm:gap-11 h-full">
             {/* All: Globe */}
             <button
               onClick={() => onSelectMode?.("all")}
-              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-3 h-full relative transition-all duration-300 ease-out group py-2.5 cursor-pointer ${
                 activeMode === "all" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "all" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Globe className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
+                <Globe className="w-6 h-6 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[17px] sm:text-[18px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.all", "All")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "all" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
@@ -212,20 +212,20 @@ export default function Navbar({
             {/* Homes: House */}
             <button
               onClick={() => onSelectMode?.("homes")}
-              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-3 h-full relative transition-all duration-300 ease-out group py-2.5 cursor-pointer ${
                 activeMode === "homes" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "homes" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Home className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
+                <Home className="w-6 h-6 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[17px] sm:text-[18px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.homes", "Homes")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "homes" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
@@ -234,20 +234,20 @@ export default function Navbar({
             {/* Experiences: Sparkles */}
             <button
               onClick={() => onSelectMode?.("experiences")}
-              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-3 h-full relative transition-all duration-300 ease-out group py-2.5 cursor-pointer ${
                 activeMode === "experiences" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "experiences" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Sparkles className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
+                <Sparkles className="w-6 h-6 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[17px] sm:text-[18px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.experiences", "Experiences")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "experiences" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
@@ -256,10 +256,10 @@ export default function Navbar({
         </div>
 
         {/* Column 3 (Right): Switch Role, Separate Profile Logo, and 3-Lines Dropdown */}
-        <div className="flex items-center justify-end gap-2.5 sm:gap-3.5 relative" ref={menuRef}>
+        <div className="flex items-center justify-end gap-3 sm:gap-4 relative" ref={menuRef}>
           <button
             onClick={handleToggleHostRole}
-            className="text-[15px] font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-4 py-2.5 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
+            className="text-[16px] sm:text-[17px] font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-5 py-3 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
           >
             {isHost ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
           </button>
@@ -267,7 +267,7 @@ export default function Navbar({
           {/* 1. SEPARATE PROFILE LOGO: Clicking directly opens users profile section */}
           <Link
             href="/profile"
-            className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-full overflow-hidden border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition flex items-center justify-center bg-[#FFF0F3] relative flex-shrink-0 cursor-pointer group"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition flex items-center justify-center bg-[#FFF0F3] relative flex-shrink-0 cursor-pointer group"
             aria-label="User profile"
             title="View Profile"
           >
@@ -278,11 +278,11 @@ export default function Navbar({
                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
-              <User className="w-5 h-5 text-[#FF385C]" />
+              <User className="w-6 h-6 text-[#FF385C]" />
             )}
             {/* Notification badge */}
             {(unreadNotifsCount + unreadMsgsCount) > 0 && (
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#FF385C] rounded-full border-2 border-white ring-1 ring-rose-200" />
+              <span className="absolute top-0 right-0 w-3 h-3 bg-[#FF385C] rounded-full border-2 border-white ring-1 ring-rose-200" />
             )}
           </Link>
 
@@ -290,16 +290,16 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-full border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition bg-white flex items-center justify-center cursor-pointer text-[#222222] flex-shrink-0"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition bg-white flex items-center justify-center cursor-pointer text-[#222222] flex-shrink-0"
             aria-label="Main menu"
             title="Main menu"
           >
-            <Menu className="w-5 h-5 text-[#222222]" strokeWidth={2.2} />
+            <Menu className="w-6 h-6 text-[#222222]" strokeWidth={2.2} />
           </button>
 
           {/* Exact Dropdown Menu with Complete Lucide Icons */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-14 w-80 max-h-[calc(100vh-90px)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-[0_6px_28px_rgba(0,0,0,0.16)] border border-[#DDDDDD] py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 menu-scrollbar">
+            <div className="absolute right-0 top-[68px] w-84 max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-[0_6px_28px_rgba(0,0,0,0.16)] border border-[#DDDDDD] py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 menu-scrollbar">
               {/* Profile Card / Role Display */}
               <div className="sticky top-0 z-10 px-5 py-3 border-b border-[#EBEBEB] bg-[#FAFAFA] rounded-t-3xl shadow-xs">
                 <div className="flex items-center gap-3">

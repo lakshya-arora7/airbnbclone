@@ -339,24 +339,24 @@ export default function SearchDeck({
       )}
 
       {/* Interactive Segmented Search Capsule */}
-      <div className="flex justify-center w-full px-4 pb-4 pt-1 relative z-30">
+      <div className="flex justify-center w-full px-4 pb-5 pt-1.5 relative z-30">
         <div
           className={`flex items-center rounded-full border transition-all duration-300 ease-out ${
             isOpen
-              ? "bg-[#EBEBEB] border-[#DDDDDD] shadow-[0_6px_20px_rgba(0,0,0,0.12)] p-1.5"
-              : "bg-white border-[#DDDDDD] shadow-[0_3px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] p-1"
-          } w-full max-w-2xl sm:max-w-3xl`}
+              ? "bg-[#EBEBEB] border-[#DDDDDD] shadow-[0_6px_24px_rgba(0,0,0,0.14)] p-2"
+              : "bg-white border-[#DDDDDD] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] p-1.5"
+          } w-full max-w-2xl sm:max-w-[850px]`}
         >
           {/* Segment 1: Where */}
           <div
             onClick={() => onOpenTab("where")}
-            className={`flex-1 px-5 py-2.5 cursor-pointer transition-all duration-300 rounded-full ${
+            className={`flex-1 px-6 py-3 cursor-pointer transition-all duration-300 rounded-full ${
               activeTab === "where"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
-            <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.where", "Where")}</p>
+            <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.where", "Where")}</p>
             {activeTab === "where" ? (
               <div className="flex items-center">
                 <input
@@ -371,7 +371,7 @@ export default function SearchDeck({
                     }
                   }}
                   placeholder={wherePlaceholder}
-                  className="w-full bg-transparent text-sm font-medium text-[#222222] focus:outline-none placeholder-[#717171] truncate"
+                  className="w-full bg-transparent text-[15px] font-medium text-[#222222] focus:outline-none placeholder-[#717171] truncate"
                   onClick={(e) => e.stopPropagation()}
                 />
                 {location && (
@@ -382,19 +382,19 @@ export default function SearchDeck({
                     }}
                     className="p-1 rounded-full hover:bg-[#EBEBEB] text-[#717171]"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
             ) : (
-              <p className="text-sm font-medium text-[#717171] truncate">
+              <p className="text-[15px] font-medium text-[#717171] truncate">
                 {location || wherePlaceholder}
               </p>
             )}
           </div>
 
           <span
-            className={`h-7 w-px transition-opacity duration-200 ${
+            className={`h-8 w-px transition-opacity duration-200 ${
               activeTab === "where" || activeTab === "when" ? "opacity-0" : "bg-[#DDDDDD]"
             }`}
           />
@@ -402,20 +402,20 @@ export default function SearchDeck({
           {/* Segment 2: When */}
           <div
             onClick={() => onOpenTab("when")}
-            className={`flex-1 px-5 py-2.5 cursor-pointer transition-all duration-300 rounded-full ${
+            className={`flex-1 px-6 py-3 cursor-pointer transition-all duration-300 rounded-full ${
               activeTab === "when"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
-            <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.when", "When")}</p>
-            <p className="text-sm font-medium text-[#717171] truncate">
+            <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.when", "When")}</p>
+            <p className="text-[15px] font-medium text-[#717171] truncate">
               {getDisplayDates()}
             </p>
           </div>
 
           <span
-            className={`h-7 w-px transition-opacity duration-200 ${
+            className={`h-8 w-px transition-opacity duration-200 ${
               activeTab === "when" || activeTab === "who" ? "opacity-0" : "bg-[#DDDDDD]"
             }`}
           />
@@ -423,15 +423,15 @@ export default function SearchDeck({
           {/* Segment 3: Who & Search Button */}
           <div
             onClick={() => onOpenTab("who")}
-            className={`flex-1 pl-5 pr-2 py-1.5 cursor-pointer transition-all duration-300 rounded-full flex items-center justify-between gap-2 ${
+            className={`flex-1 pl-6 pr-2.5 py-2 cursor-pointer transition-all duration-300 rounded-full flex items-center justify-between gap-2.5 ${
               activeTab === "who"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
             <div className="truncate">
-              <p className="text-[12px] font-bold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
-              <p className="text-sm font-medium text-[#717171] truncate">
+              <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
+              <p className="text-[15px] font-medium text-[#717171] truncate">
                 {getDisplayGuests()}
               </p>
             </div>
@@ -443,12 +443,12 @@ export default function SearchDeck({
                 handleExecuteSearch();
               }}
               className={`rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-md ${
-                isOpen || activeTab === "who" ? "px-5 py-2.5 gap-2" : "w-10 h-10 flex-shrink-0"
+                isOpen || activeTab === "who" ? "px-6 py-3 gap-2 text-[15px]" : "w-12 h-12 flex-shrink-0"
               }`}
               aria-label="Search"
             >
-              <Search className="w-4 h-4 stroke-[3]" />
-              {(isOpen || activeTab === "who") && <span className="pr-1">{t("search.search", "Search")}</span>}
+              <Search className="w-5 h-5 stroke-[2.8]" />
+              {(isOpen || activeTab === "who") && <span className="pr-1 font-bold">{t("search.search", "Search")}</span>}
             </button>
           </div>
         </div>

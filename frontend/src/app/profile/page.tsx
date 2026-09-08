@@ -33,16 +33,16 @@ export default function ProfilePage() {
       {/* ============================================================ */}
       {/* 1. TOP HEADER MATCHING SCREENSHOT                            */}
       {/* ============================================================ */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 sm:px-12 py-4 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 sm:px-12 py-5 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {/* Left: Brand Logo */}
         <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
-          <span className="font-extrabold text-[24px] sm:text-[26px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+          <span className="font-extrabold text-[29px] sm:text-[33px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
             bnbair
           </span>
         </Link>
 
         {/* Right: Switch to hosting & Profile Menu */}
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-center gap-3.5 sm:gap-4 relative">
           <button
             onClick={() => {
               if (isHost) {
@@ -53,7 +53,7 @@ export default function ProfilePage() {
                 router.push("/hosting");
               }
             }}
-            className="text-sm font-semibold text-[#222222] hover:bg-[#F7F7F7] px-4 py-2 rounded-full transition"
+            className="text-[16px] sm:text-[17px] font-semibold text-[#222222] hover:bg-[#F7F7F7] px-5 py-3 rounded-full transition cursor-pointer"
           >
             {isHost ? "Switch to travelling" : "Switch to hosting"}
           </button>
@@ -61,28 +61,28 @@ export default function ProfilePage() {
           {/* User Avatar */}
           <Link
             href="/profile"
-            className="w-9 h-9 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] flex items-center justify-center hover:ring-2 hover:ring-[#222222] transition cursor-pointer"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] flex items-center justify-center hover:ring-2 hover:ring-[#222222] transition cursor-pointer"
             title="Profile"
           >
             {persona.avatarUrl ? (
               <img src={persona.avatarUrl} alt={persona.fullName} className="w-full h-full object-cover" />
             ) : (
-              <User className="w-5 h-5 text-[#717171]" />
+              <User className="w-6 h-6 text-[#717171]" />
             )}
           </Link>
 
           {/* Hamburger Menu */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center hover:shadow-md transition bg-white"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#DDDDDD] flex items-center justify-center hover:shadow-md transition bg-white cursor-pointer"
             aria-label="Main menu"
           >
-            <Menu className="w-4 h-4 text-[#222222]" />
+            <Menu className="w-6 h-6 text-[#222222]" strokeWidth={2.2} />
           </button>
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-[#DDDDDD] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 top-16 w-68 bg-white rounded-2xl shadow-xl border border-[#DDDDDD] py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
               <Link
                 href="/wishlists"
                 onClick={() => setIsMenuOpen(false)}
