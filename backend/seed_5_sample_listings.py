@@ -352,7 +352,70 @@ def seed_five_sample_listings(db=None):
         db.add(booking_completed)
         db.commit()
 
-        print(f"[Success] Seeded exactly 5 listings and bookings (confirmed & completed) successfully into {engine.url}!")
+        # 5. Authentic Sample Reviews
+        sample_reviews = [
+            Review(
+                id=1,
+                listing_id=1,
+                author_id=4,
+                rating=5.0,
+                cleanliness_rating=5.0,
+                accuracy_rating=5.0,
+                checkin_rating=5.0,
+                communication_rating=5.0,
+                location_rating=5.0,
+                value_rating=5.0,
+                comment="Absolutely loved staying here! Spotless apartment, superfast WiFi for work, and Ravi was extremely responsive and helpful throughout our stay.",
+                created_at=datetime.now(timezone.utc) - timedelta(days=15)
+            ),
+            Review(
+                id=2,
+                listing_id=1,
+                author_id=3,
+                rating=5.0,
+                cleanliness_rating=5.0,
+                accuracy_rating=5.0,
+                checkin_rating=5.0,
+                communication_rating=5.0,
+                location_rating=5.0,
+                value_rating=5.0,
+                comment="Great prime location in Sector 63 with a peaceful sunset balcony and fully stocked modular kitchen. Truly a 5-star experience!",
+                created_at=datetime.now(timezone.utc) - timedelta(days=8)
+            ),
+            Review(
+                id=3,
+                listing_id=2,
+                author_id=4,
+                rating=5.0,
+                cleanliness_rating=5.0,
+                accuracy_rating=5.0,
+                checkin_rating=5.0,
+                communication_rating=5.0,
+                location_rating=5.0,
+                value_rating=5.0,
+                comment="The private pool and manicured lawn were incredible. Perfect weekend family getaway with complete privacy and luxury.",
+                created_at=datetime.now(timezone.utc) - timedelta(days=12)
+            ),
+            Review(
+                id=4,
+                listing_id=3,
+                author_id=1,
+                rating=5.0,
+                cleanliness_rating=5.0,
+                accuracy_rating=5.0,
+                checkin_rating=5.0,
+                communication_rating=5.0,
+                location_rating=5.0,
+                value_rating=5.0,
+                comment="Breathtaking skyline views and gorgeous interiors. One of the best penthouse stays in Noida, seamless check-in.",
+                created_at=datetime.now(timezone.utc) - timedelta(days=18)
+            )
+        ]
+        for rev in sample_reviews:
+            db.add(rev)
+        db.commit()
+
+        print(f"[Success] Seeded exactly 5 listings, bookings, and verified reviews successfully into {engine.url}!")
         return True
     except Exception as e:
         db.rollback()
