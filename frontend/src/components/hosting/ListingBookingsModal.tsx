@@ -92,7 +92,7 @@ export default function ListingBookingsModal({
               <div className="flex items-center justify-between text-xs text-[#717171] font-semibold px-1">
                 <span>{bookings.length} {bookings.length === 1 ? "Reservation" : "Reservations"} Found</span>
                 <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[11px] font-bold border border-emerald-200">
-                  Fixed Dates & Status
+                  Reservation Status
                 </span>
               </div>
 

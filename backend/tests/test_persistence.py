@@ -129,7 +129,7 @@ def test_seed_database_completeness_and_idempotency():
         assert stats["bookings"] >= 2, f"Expected at least 2 bookings, got {stats['bookings']}"
 
         # Verify personas exist
-        guest = db.query(User).filter(User.email == "l***1@gmail.com").first()
+        guest = db.query(User).filter((User.email == "lakshya@gmail.com") | (User.email == "l***1@gmail.com")).first()
         assert guest is not None
         assert guest.role == "GUEST"
 

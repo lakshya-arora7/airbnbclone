@@ -110,6 +110,19 @@ def cancel_booking(db: Session, booking_id: int, user_id: int) -> Booking:
     if booking.guest_id != user_id and booking.listing.host_id != user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to cancel this reservation.")
 
+    if booking.status == "CANCELLED":
+        return booking
+
+    # Verify 24-hour cancellation window for guests
+    if booking.guest_id == user_id:
+        from datetime import date
+        today = date.today()
+        if (booking.check_in - today).days < 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cancellations with full refund are only permitted up to 24 hours prior to check-in."
+            )
+
     booking.status = "CANCELLED"
     db.commit()
     db.refresh(booking)

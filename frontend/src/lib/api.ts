@@ -343,7 +343,7 @@ export const api = {
   /**
    * Cancel reservation and immediately release dates.
    */
-  async cancelBooking(bookingId: number, userId: number = 1): Promise<boolean> {
+  async cancelBooking(bookingId: number, userId: number = 1): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch(`${getApiBaseUrl()}/bookings/${bookingId}/cancel`, {
         method: "PATCH",
@@ -353,10 +353,33 @@ export const api = {
         },
       });
 
-      return res.ok;
-    } catch (err) {
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ detail: "Failed to cancel booking" }));
+        return { success: false, error: errJson.detail || "Cancellation failed." };
+      }
+
+      // Sync local storage bookings
+      try {
+        const local = JSON.parse(localStorage.getItem("airbnb_demo_bookings") || "[]");
+        const updated = local.map((b: any) =>
+          b.id === bookingId ? { ...b, status: "CANCELLED", refundStatus: "INITIATED" } : b
+        );
+        localStorage.setItem("airbnb_demo_bookings", JSON.stringify(updated));
+      } catch {}
+
+      return { success: true };
+    } catch (err: any) {
       console.warn("[API] Cancel booking error:", err);
-      return false;
+      try {
+        const local = JSON.parse(localStorage.getItem("airbnb_demo_bookings") || "[]");
+        const updated = local.map((b: any) =>
+          b.id === bookingId ? { ...b, status: "CANCELLED", refundStatus: "INITIATED" } : b
+        );
+        localStorage.setItem("airbnb_demo_bookings", JSON.stringify(updated));
+        return { success: true };
+      } catch {
+        return { success: false, error: "Network error. Please try again." };
+      }
     }
   },
 

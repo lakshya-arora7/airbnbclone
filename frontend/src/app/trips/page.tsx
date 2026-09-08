@@ -7,7 +7,21 @@ import Navbar from "@/components/header/Navbar";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
-import { Calendar, MapPin, CheckCircle, Star } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  CheckCircle,
+  Star,
+  ShieldCheck,
+  AlertCircle,
+  RotateCcw,
+  CheckCircle2,
+  X,
+  Clock,
+  HelpCircle,
+  ArrowRight,
+  Info,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import ReviewModal from "@/components/reviews/ReviewModal";
 
@@ -39,12 +53,55 @@ interface TripRecord {
   createdAt: string;
 }
 
+/**
+ * Calculate cancellation eligibility based on the 24-hour cutoff rule.
+ * Standard check-in is assumed at 3:00 PM (15:00) on the check-in date.
+ */
+function getCancellationInfo(checkInStr: string) {
+  if (!checkInStr) {
+    return { isEligible: false, hoursRemaining: 0, isPast: true };
+  }
+
+  const parts = checkInStr.split("-");
+  let checkInDate: Date;
+  if (parts.length === 3) {
+    checkInDate = new Date(
+      Number(parts[0]),
+      Number(parts[1]) - 1,
+      Number(parts[2]),
+      15,
+      0,
+      0
+    );
+  } else {
+    checkInDate = new Date(checkInStr);
+  }
+
+  const now = new Date();
+  const diffMs = checkInDate.getTime() - now.getTime();
+  const hoursRemaining = diffMs / (1000 * 60 * 60);
+
+  return {
+    isEligible: hoursRemaining >= 24,
+    hoursRemaining: Math.max(0, Math.round(hoursRemaining)),
+    isPast: hoursRemaining <= 0,
+  };
+}
+
 export default function MyTripsPage() {
   const { persona } = useAuthPersona();
   const { formatPrice, t } = useLanguageCurrency();
+
   const [trips, setTrips] = useState<TripRecord[]>([]);
   const [reviewingTrip, setReviewingTrip] = useState<TripRecord | null>(null);
   const [userReviews, setUserReviews] = useState<Record<number, any>>({});
+
+  // Cancellation State
+  const [cancellingTrip, setCancellingTrip] = useState<TripRecord | null>(null);
+  const [policyTrip, setPolicyTrip] = useState<TripRecord | null>(null);
+  const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [cancelToast, setCancelToast] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const loadUserReviews = async () => {
     try {
@@ -74,7 +131,7 @@ export default function MyTripsPage() {
         });
       }
 
-      // 2. Also check localStorage to merge any immediate local reviews
+      // 2. Merge local reviews from localStorage
       try {
         const stored = JSON.parse(localStorage.getItem("airbnb_user_reviews") || "{}");
         Object.keys(stored).forEach((lidStr) => {
@@ -96,21 +153,76 @@ export default function MyTripsPage() {
     }
   };
 
-  useEffect(() => {
-    // Fetch live trips from backend for current persona
+  const fetchTrips = () => {
     api.getMyTrips(persona.id || 1).then((liveTrips) => {
       setTrips(liveTrips || []);
     });
+  };
 
-    // Fetch user's reviews
+  useEffect(() => {
+    fetchTrips();
     loadUserReviews();
   }, [persona.id]);
+
+  // Handle Confirmed Cancellation with Refund
+  const handleConfirmCancellation = async () => {
+    if (!cancellingTrip) return;
+    setIsCancelling(true);
+    setCancelError(null);
+
+    const res = await api.cancelBooking(cancellingTrip.id, persona.id || 1);
+    setIsCancelling(false);
+
+    if (res.success) {
+      // Update local state immediately
+      setTrips((prev) =>
+        prev.map((t) =>
+          t.id === cancellingTrip.id ? { ...t, status: "CANCELLED" } : t
+        )
+      );
+
+      const code = cancellingTrip.confirmationCode;
+      const amount = formatPrice(cancellingTrip.totalPrice);
+      setCancelToast(
+        `Reservation #${code} has been successfully cancelled. A full refund of ${amount} has been initiated to your original payment method.`
+      );
+      setCancellingTrip(null);
+
+      // Trigger cross-tab/component update
+      window.dispatchEvent(new CustomEvent("airbnb_listings_updated"));
+    } else {
+      setCancelError(res.error || "Failed to cancel reservation. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-[#222222] flex flex-col">
       <Navbar />
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 pb-24 sm:pb-8 flex flex-col">
+        {/* Toast Alert Banner upon successful cancellation & refund initiation */}
+        {cancelToast && (
+          <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 shadow-sm flex items-start justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-sm text-emerald-900">Cancellation Confirmed · Refund Initiated</h4>
+                <p className="text-xs text-emerald-800 mt-0.5 leading-relaxed">{cancelToast}</p>
+                <p className="text-[11px] text-emerald-700 mt-1 font-medium">
+                  Expected credit timeline: 3–5 business days depending on your bank / UPI provider.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCancelToast(null)}
+              className="p-1 rounded-full text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+              aria-label="Dismiss message"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#EBEBEB]">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#222222]">
@@ -125,12 +237,11 @@ export default function MyTripsPage() {
 
         {/* 2-Column Split View Matching Authentic Layout */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 min-h-[640px]">
-          {/* Left Column: Empty State Banner OR Previous Trips List */}
+          {/* Left Column: Empty State Banner OR Booked Trips List */}
           <div className="lg:col-span-5 flex flex-col justify-center py-4 sm:py-8 lg:pr-4">
             {trips.length === 0 ? (
-              /* Exact Screenshot 1 Left Empty State */
+              /* Empty State */
               <div className="flex flex-col items-center text-center space-y-6 max-w-md mx-auto">
-                {/* High quality 3D illustration generated for Trips */}
                 <div className="w-full max-w-[280px] sm:max-w-[320px] aspect-square flex items-center justify-center">
                   <img
                     src="/images/trips-map-illustration.jpg"
@@ -161,12 +272,12 @@ export default function MyTripsPage() {
                 </div>
               </div>
             ) : (
-              /* Previous Trips List when user has previous trips */
-              <div className="space-y-6 overflow-y-auto max-h-[680px] pr-2">
+              /* Booked Trips List */
+              <div className="space-y-6 overflow-y-auto max-h-[680px] pr-2 menu-scrollbar">
                 <div className="flex items-center justify-between pb-2 border-b border-[#EBEBEB]">
                   <h3 className="font-bold text-lg text-[#222222]">Your Booked Stays</h3>
                   <span className="text-xs font-semibold text-[#FF385C] bg-[#FFF0F3] px-2.5 py-1 rounded-full">
-                    {trips.length} Booked
+                    {trips.length} Total
                   </span>
                 </div>
 
@@ -175,10 +286,16 @@ export default function MyTripsPage() {
                   const isCompleted = trip.status === "COMPLETED";
                   const isConfirmed = trip.status === "CONFIRMED";
                   const userReview = userReviews[trip.listingId];
+                  const { isEligible, hoursRemaining, isPast } = getCancellationInfo(trip.checkIn);
+
                   return (
                     <div
                       key={trip.id}
-                      className="border border-[#DDDDDD] rounded-2xl p-4 sm:p-5 hover:shadow-md transition bg-white space-y-4"
+                      className={`border rounded-2xl p-4 sm:p-5 transition bg-white space-y-4 ${
+                        isCancelled
+                          ? "border-gray-200 bg-gray-50/50 opacity-90"
+                          : "border-[#DDDDDD] hover:shadow-md"
+                      }`}
                     >
                       <div className="flex gap-4">
                         {trip.listingImage && (
@@ -190,13 +307,16 @@ export default function MyTripsPage() {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
+                            {/* Status Badge */}
                             <span
                               className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                                 isCompleted
                                   ? "bg-blue-50 text-blue-700 border border-blue-200"
                                   : isCancelled
-                                  ? "bg-gray-100 text-[#717171]"
-                                  : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                  : isEligible
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-amber-50 text-amber-700 border border-amber-200"
                               }`}
                             >
                               {isCompleted ? (
@@ -205,9 +325,20 @@ export default function MyTripsPage() {
                                   <span>Completed</span>
                                 </>
                               ) : isCancelled ? (
-                                <span>Cancelled</span>
+                                <>
+                                  <RotateCcw className="w-3 h-3 text-rose-600" />
+                                  <span>Cancelled · Refund initiated</span>
+                                </>
+                              ) : isEligible ? (
+                                <>
+                                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                  <span>Confirmed · Free cancellation</span>
+                                </>
                               ) : (
-                                <span>Confirmed</span>
+                                <>
+                                  <AlertCircle className="w-3 h-3 text-amber-600" />
+                                  <span>Confirmed · Non-refundable</span>
+                                </>
                               )}
                             </span>
                             <span className="text-xs font-mono text-[#717171]">
@@ -223,15 +354,54 @@ export default function MyTripsPage() {
                             <span>{trip.city}, {trip.country}</span>
                           </p>
 
+                          {/* Check-in & Check-out Dates */}
                           <div className="mt-2 text-xs font-semibold text-[#222222] flex items-center gap-1.5 flex-wrap">
                             <Calendar className="w-3.5 h-3.5 text-[#717171]" />
                             <span>{trip.checkIn} – {trip.checkOut}</span>
-                            <span className="text-[10px] text-[#717171] bg-[#F7F7F7] px-2 py-0.5 rounded-md border border-[#EBEBEB] font-medium">
-                              Fixed dates
-                            </span>
                           </div>
                         </div>
                       </div>
+
+                      {/* Refund Status Box if Cancelled */}
+                      {isCancelled && (
+                        <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+                          <div className="flex items-center gap-2.5 text-emerald-900">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                            <div>
+                              <p className="font-bold">
+                                100% Refund of {formatPrice(trip.totalPrice)} initiated
+                              </p>
+                              <p className="text-[11px] text-emerald-700">
+                                Refund initiated to original payment method (credit within 3–5 business days)
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 uppercase">
+                            REFUNDED
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Cancellation Policy Banner for Confirmed Active Trips */}
+                      {isConfirmed && (
+                        <div>
+                          {isEligible ? (
+                            <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-800">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                              <span className="text-[11px] font-medium leading-tight">
+                                <strong>Free cancellation:</strong> You can cancel up to 24h before check-in ({hoursRemaining}h remaining) for a 100% full refund.
+                              </span>
+                            </div>
+                          ) : !isPast ? (
+                            <div className="p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl flex items-center gap-2 text-xs text-amber-800">
+                              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                              <span className="text-[11px] font-medium leading-tight">
+                                <strong>Non-refundable:</strong> Check-in is in {hoursRemaining}h (within 24h cutoff). Full refund is no longer automated.
+                              </span>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
 
                       {/* Posted User Review Display Card */}
                       {userReview && (
@@ -258,6 +428,7 @@ export default function MyTripsPage() {
                         </div>
                       )}
 
+                      {/* Actions Row */}
                       <div className="pt-3 border-t border-[#F0F0F0] flex items-center justify-between text-xs">
                         <div>
                           <span className="text-[#717171]">{t("listing.total", "Total")}: </span>
@@ -267,6 +438,28 @@ export default function MyTripsPage() {
                         </div>
 
                         <div className="flex items-center gap-3">
+                          {/* Cancel & Refund Button if within 24h window */}
+                          {isConfirmed && isEligible && (
+                            <button
+                              type="button"
+                              onClick={() => setCancellingTrip(trip)}
+                              className="px-3.5 py-1.5 rounded-full text-xs font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-rose-600 transition shadow-2xs active:scale-95 cursor-pointer"
+                            >
+                              Cancel & get refund
+                            </button>
+                          )}
+
+                          {/* Cancellation Policy info if within 24h cutoff */}
+                          {isConfirmed && !isEligible && !isPast && (
+                            <button
+                              type="button"
+                              onClick={() => setPolicyTrip(trip)}
+                              className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] bg-[#F7F7F7] hover:bg-[#EBEBEB] border border-[#DDDDDD] transition cursor-pointer"
+                            >
+                              Cancellation policy
+                            </button>
+                          )}
+
                           {/* Leave a review is ONLY active for COMPLETED trips */}
                           {isCompleted && (
                             <button
@@ -310,20 +503,203 @@ export default function MyTripsPage() {
           {/* Right Column: Full Interactive World Map matching Screenshot 1 */}
           <div className="lg:col-span-7 h-[520px] lg:h-full min-h-[500px]">
             <TripsWorldMap
-              trips={trips.map((t: TripRecord) => ({
-                id: t.id,
-                title: t.listingTitle,
-                city: t.city,
-                country: t.country,
-                lat: t.lat,
-                lng: t.lng,
-                image: t.listingImage,
-                dates: `${t.checkIn} to ${t.checkOut}`,
-              }))}
+              trips={trips
+                .filter((t) => t.status !== "CANCELLED")
+                .map((t: TripRecord) => ({
+                  id: t.id,
+                  title: t.listingTitle,
+                  city: t.city,
+                  country: t.country,
+                  lat: t.lat,
+                  lng: t.lng,
+                  image: t.listingImage,
+                  dates: `${t.checkIn} to ${t.checkOut}`,
+                }))}
             />
           </div>
         </div>
       </main>
+
+      {/* Cancellation Confirmation Modal */}
+      {cancellingTrip && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#DDDDDD] space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-[#EBEBEB]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 border border-rose-200">
+                  <RotateCcw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-lg text-[#222222]">
+                    Cancel Reservation
+                  </h3>
+                  <p className="text-xs text-[#717171]">
+                    Confirmation #{cancellingTrip.confirmationCode}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setCancellingTrip(null);
+                  setCancelError(null);
+                }}
+                className="p-1 rounded-full text-[#717171] hover:bg-[#F7F7F7] hover:text-[#222222] transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Error Message if any */}
+            {cancelError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <span>{cancelError}</span>
+              </div>
+            )}
+
+            {/* Trip Info Card */}
+            <div className="p-3.5 bg-[#F7F7F7] rounded-2xl flex items-center gap-3.5">
+              {cancellingTrip.listingImage && (
+                <img
+                  src={cancellingTrip.listingImage}
+                  alt={cancellingTrip.listingTitle}
+                  className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-[#DDDDDD]"
+                />
+              )}
+              <div className="min-w-0">
+                <h4 className="font-bold text-sm text-[#222222] truncate">
+                  {cancellingTrip.listingTitle}
+                </h4>
+                <p className="text-xs text-[#717171] mt-0.5">
+                  {cancellingTrip.city}, {cancellingTrip.country}
+                </p>
+                <p className="text-xs font-semibold text-[#222222] mt-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-[#717171]" />
+                  <span>{cancellingTrip.checkIn} to {cancellingTrip.checkOut}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Full Refund Guarantee Box */}
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2">
+              <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                <span>100% Full Refund Eligible</span>
+              </div>
+              <p className="text-xs text-emerald-800 leading-relaxed">
+                You are cancelling more than 24 hours prior to check-in ({getCancellationInfo(cancellingTrip.checkIn).hoursRemaining}h remaining). Under bnbair cancellation policy, you are eligible for an immediate full refund.
+              </p>
+              <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-between text-xs font-bold text-emerald-900">
+                <span>Refund Amount:</span>
+                <span className="text-base text-emerald-700">{formatPrice(cancellingTrip.totalPrice)}</span>
+              </div>
+            </div>
+
+            {/* Breakdown Details */}
+            <div className="space-y-2 text-xs text-[#717171]">
+              <div className="flex justify-between">
+                <span>Total Amount Paid</span>
+                <span className="font-semibold text-[#222222]">{formatPrice(cancellingTrip.totalPrice)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Refund Method</span>
+                <span className="font-semibold text-[#222222]">Original Payment Method</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Estimated Processing Time</span>
+                <span className="font-semibold text-[#222222]">3–5 Business Days</span>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setCancellingTrip(null);
+                  setCancelError(null);
+                }}
+                disabled={isCancelling}
+                className="px-5 py-2.5 rounded-xl border border-[#DDDDDD] text-xs font-bold text-[#222222] hover:bg-[#F7F7F7] transition cursor-pointer"
+              >
+                Keep reservation
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancellation}
+                disabled={isCancelling}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm hover:shadow-md transition active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-2"
+              >
+                {isCancelling ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Initiating refund...</span>
+                  </>
+                ) : (
+                  <span>Confirm cancellation & refund</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Policy Explanation Modal (for trips within 24h cutoff) */}
+      {policyTrip && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#DDDDDD] space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-start justify-between pb-3 border-b border-[#EBEBEB]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-200">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-lg text-[#222222]">
+                    24-Hour Cancellation Policy
+                  </h3>
+                  <p className="text-xs text-[#717171]">
+                    #{policyTrip.confirmationCode} · {policyTrip.city}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPolicyTrip(null)}
+                className="p-1 rounded-full text-[#717171] hover:bg-[#F7F7F7] hover:text-[#222222] transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-2 text-xs text-amber-900 leading-relaxed">
+              <p className="font-bold">Automated full refund cutoff reached</p>
+              <p>
+                Under bnbair policy, free cancellations with full refund are available up to <strong>24 hours before check-in</strong>.
+              </p>
+              <p>
+                Your check-in is scheduled for <strong>{policyTrip.checkIn}</strong> (less than 24 hours away). Because the host has reserved and prepared the accommodation, automated refunds are no longer available for this stay.
+              </p>
+            </div>
+
+            <div className="space-y-2 text-xs text-[#717171]">
+              <p className="font-semibold text-[#222222]">Have an emergency or extenuating circumstance?</p>
+              <p>
+                You can reach out directly to your host through Messages or contact bnbair 24/7 Support to request assistance.
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setPolicyTrip(null)}
+                className="px-5 py-2.5 rounded-xl bg-[#222222] hover:bg-black text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                I understand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Leave / Edit Review Modal */}
       {reviewingTrip && (

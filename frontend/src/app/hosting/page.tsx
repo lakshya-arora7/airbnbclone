@@ -546,9 +546,6 @@ export default function HostDashboardPage() {
                           <p className="text-[11px] text-[#717171] font-semibold uppercase">{booking.status}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-[11px] text-[#717171] font-semibold bg-[#F7F7F7] px-2.5 py-1 rounded-full border border-[#EBEBEB]">
-                            Fixed dates
-                          </span>
                           <button
                             onClick={() => {
                               setActiveTab("messages");
@@ -1750,7 +1747,7 @@ export default function HostDashboardPage() {
         hostId={persona.id || 2}
       />
 
-      {/* 9. Listing Bookings Modal (Fixed Dates & Records) */}
+      {/* 9. Listing Bookings Modal (Reservations & Status) */}
       <ListingBookingsModal
         isOpen={isListingBookingsModalOpen}
         listing={activeListingForBookings}
