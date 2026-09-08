@@ -117,6 +117,7 @@ export default function CreateListingModal({
   // Step 7: Identity Verification
   const [identityConfirmed, setIdentityConfirmed] = useState<boolean>(true);
   const [standardsAgreed, setStandardsAgreed] = useState<boolean>(true);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -133,8 +134,6 @@ export default function CreateListingModal({
     setPhotos((prev) => [...prev, customPhotoUrl.trim()]);
     setCustomPhotoUrl("");
   };
-
-  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   // Upload photo from device (Bonus Feature: Image upload to storage)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

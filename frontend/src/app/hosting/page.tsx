@@ -141,6 +141,19 @@ export default function HostDashboardPage() {
 
   const activeThread = chatThreads.find((t) => t.id === activeThreadId) || chatThreads[0] || null;
 
+  // Support query params: ?tab=listings or ?create=true
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "listings" || params.get("create") === "true") {
+        setActiveTab("listings");
+      }
+      if (params.get("create") === "true") {
+        setIsCreateListingModalOpen(true);
+      }
+    }
+  }, []);
+
   // Load host listings and reservations from live backend API
   useEffect(() => {
     // When on hosting dashboard, ensure hosting persona
