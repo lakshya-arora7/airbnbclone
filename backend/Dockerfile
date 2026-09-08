@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/backend:/app
 
 WORKDIR /app
 
@@ -13,16 +13,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
-COPY requirements.txt .
+COPY requirements.txt* ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend files
+# Copy application code
 COPY . .
 
-# Ensure uploads directory exists
-RUN mkdir -p /app/static/uploads
+# Ensure static uploads directory exists
+RUN mkdir -p /app/backend/static/uploads /app/static/uploads
 
 EXPOSE 8000
 
-# Run uvicorn bound to 0.0.0.0 and Railway's dynamic $PORT
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "if [ -d 'backend' ]; then cd backend; fi; uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
