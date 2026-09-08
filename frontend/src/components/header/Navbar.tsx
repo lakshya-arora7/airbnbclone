@@ -255,23 +255,13 @@ export default function Navbar({
           </nav>
         </div>
 
-        {/* Column 3 (Right): Switch Role, Globe, Separate Profile Logo, and 3-Lines Dropdown */}
+        {/* Column 3 (Right): Switch Role, Separate Profile Logo, and 3-Lines Dropdown */}
         <div className="flex items-center justify-end gap-2.5 sm:gap-3.5 relative" ref={menuRef}>
           <button
             onClick={handleToggleHostRole}
             className="text-[15px] font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-4 py-2.5 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
           >
             {isHost ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
-          </button>
-
-          {/* Simple Globe Icon for Language & Currency */}
-          <button
-            onClick={openLanguageModal}
-            className="p-2.5 sm:p-3 rounded-full hover:bg-[#FFF0F3] text-[#222222] hover:text-[#FF385C] transition cursor-pointer flex-shrink-0"
-            aria-label="Choose a language and currency"
-            title="Language & Currency"
-          >
-            <Globe className="w-5 h-5" />
           </button>
 
           {/* 1. SEPARATE PROFILE LOGO: Clicking directly opens users profile section */}
