@@ -324,11 +324,11 @@ export default function HostDashboardPage() {
       {/* ========================================================================= */}
       {/* 1. TOP HOST NAVBAR MATCHING SCREENSHOTS 1, 2, 3, 4                        */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 sm:px-10 lg:px-12 xl:px-16 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-4 sm:px-6 md:px-10 lg:px-12 xl:px-16 h-[72px] sm:h-[88px] md:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
         {/* Left: Brand Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
-            <span className="font-extrabold text-[29px] sm:text-[33px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+            <span className="font-extrabold text-[24px] sm:text-[29px] md:text-[33px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
               bnbair
             </span>
           </Link>
@@ -336,7 +336,7 @@ export default function HostDashboardPage() {
 
         {/* Center: The 4 Host Tabs (Today, Calendar, Listings, Messages) - Perfectly Centered */}
         <div className="flex items-center justify-center">
-          <nav className="flex items-center gap-7 sm:gap-11 h-full">
+          <nav className="flex items-center gap-2.5 sm:gap-7 md:gap-11 h-full overflow-x-auto no-scrollbar">
             {(["today", "calendar", "listings", "messages"] as HostTab[]).map((tab) => {
               const isActive = activeTab === tab;
               const labelMap: Record<HostTab, string> = {
@@ -350,7 +350,7 @@ export default function HostDashboardPage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-2.5 text-[16px] sm:text-[17px] font-semibold relative transition cursor-pointer ${
+                  className={`py-2 sm:py-2.5 text-xs sm:text-[16px] md:text-[17px] font-semibold relative transition cursor-pointer whitespace-nowrap ${
                     isActive ? "text-[#222222] font-bold" : "text-[#717171] hover:text-[#222222]"
                   }`}
                 >
@@ -375,7 +375,7 @@ export default function HostDashboardPage() {
 
           <Link
             href="/profile"
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] cursor-pointer hover:ring-2 hover:ring-[#222222] transition block"
+            className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#EBEBEB] cursor-pointer hover:ring-2 hover:ring-[#222222] transition block"
             title="Profile"
           >
             {persona.avatarUrl ? (
@@ -649,7 +649,7 @@ export default function HostDashboardPage() {
                         setSelectedCalendarDate(day);
                         handleToggleBlockDate(day);
                       }}
-                      className={`min-h-[85px] p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
+                      className={`min-h-[56px] sm:min-h-[85px] p-1 sm:p-3 rounded-xl sm:rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
                         isToday
                           ? "border-[#222222] bg-white shadow-xs"
                           : isBlocked
@@ -661,15 +661,15 @@ export default function HostDashboardPage() {
                     >
                       <div className="flex items-center justify-between">
                         {isToday ? (
-                          <span className="w-6 h-6 rounded-full bg-[#E00B41] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                          <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#E00B41] text-white flex items-center justify-center font-bold text-[10px] sm:text-xs shadow-xs">
                             {day}
                           </span>
                         ) : (
-                          <span className="font-semibold text-xs text-[#222222]">{day}</span>
+                          <span className="font-semibold text-[11px] sm:text-xs text-[#222222]">{day}</span>
                         )}
                       </div>
 
-                      <div className="text-[11px] font-bold text-[#717171]">
+                      <div className="text-[9px] sm:text-[11px] font-bold text-[#717171] truncate">
                         {isBlocked ? "Blocked" : formatPrice(customPricePerNight)}
                       </div>
                     </div>

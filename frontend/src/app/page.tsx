@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import ListingCard from "@/components/listings/ListingCard";
 import FilterModal from "@/components/filters/FilterModal";
 import { FilterParams } from "@/types";
@@ -234,7 +235,7 @@ export default function Home() {
         onSearch={(params) => setSearchParams(params)}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-6 w-full">
         {/* Active Search Criteria Banner (if user searched via search bar) */}
         {(searchParams.location || searchParams.guests || searchParams.checkIn) && (
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6 px-4 py-3 bg-[#F7F7F7] border border-[#EBEBEB] rounded-2xl">
@@ -556,7 +557,7 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* FLOATING "SHOW MAP" / "SHOW LIST" PILL BUTTON (AUTHENTIC AIRBNB POSITION) */}
       {/* ========================================================================= */}
-      <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-20 sm:bottom-7 left-1/2 -translate-x-1/2 z-40">
         <button
           onClick={() => {
             setShowMap(!showMap);
@@ -582,6 +583,9 @@ export default function Home() {
         initialFilters={filterParams}
         totalCount={filteredListings.length}
       />
+
+      {/* Mobile Bottom Navigation Bar (Phones only) */}
+      <MobileBottomNav />
     </div>
   );
 }

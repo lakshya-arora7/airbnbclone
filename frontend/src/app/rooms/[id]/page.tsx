@@ -98,7 +98,7 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
       {/* Top Navbar */}
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6">
         {/* Title Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#222222] mb-2">
@@ -239,7 +239,7 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* Right Column: Sticky Reservation Card */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1" id="booking-section">
             <BookingWidget listing={listing} blockedDateRanges={blockedDates} />
           </div>
         </div>
@@ -254,6 +254,36 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
           listing={listing}
         />
       </main>
+
+      {/* Mobile Sticky Booking Footer (Only visible on small screens < 1024px) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#EBEBEB] px-5 py-3 flex items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.08)] pb-[calc(12px+env(safe-area-inset-bottom))]">
+        <div>
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold text-[#222222]">
+              ₹{listing.pricePerNight.toLocaleString("en-IN")}
+            </span>
+            <span className="text-xs text-[#717171]">/ night</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-[#717171]">
+            <Star className="w-3 h-3 fill-[#222222] text-[#222222]" />
+            <span className="font-semibold text-[#222222]">{listing.rating.toFixed(2)}</span>
+            <span>({listing.reviewCount})</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const bookingEl = document.getElementById("booking-section");
+            if (bookingEl) {
+              bookingEl.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          className="px-6 py-3 bg-[#FF385C] hover:bg-[#E00B41] text-white font-bold text-sm rounded-xl shadow-sm transition active:scale-95 cursor-pointer"
+        >
+          Reserve
+        </button>
+      </div>
     </div>
   );
 }

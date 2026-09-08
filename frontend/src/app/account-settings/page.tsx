@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import {
   User,
   Shield,
@@ -197,16 +198,16 @@ export default function AccountSettingsPage() {
       {/* ========================================================================= */}
       {/* 2. MAIN 2-COLUMN SPLIT WORKSPACE MATCHING SCREENSHOTS 1, 2, 3, 4, 5       */}
       {/* ========================================================================= */}
-      <div className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-8 py-8 flex flex-col md:flex-row gap-8 lg:gap-16">
+      <div className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-8 py-6 md:py-8 pb-20 md:pb-8 flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-16">
         {/* ======================================================================= */}
         {/* LEFT SIDEBAR: ACCOUNT SETTINGS NAVIGATION (Screenshot 1)                 */}
         {/* ======================================================================= */}
         <aside className="w-full md:w-72 lg:w-80 flex-shrink-0">
-          <h2 className="text-2xl sm:text-[26px] font-extrabold text-[#222222] mb-6 px-3">
+          <h2 className="text-2xl sm:text-[26px] font-extrabold text-[#222222] mb-3 md:mb-6 px-1 md:px-3">
             Account settings
           </h2>
 
-          <nav className="space-y-1">
+          <nav className="flex md:flex-col overflow-x-auto no-scrollbar gap-2 md:gap-1 pb-2 md:pb-0">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -215,19 +216,19 @@ export default function AccountSettingsPage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium transition cursor-pointer text-left ${
+                  className={`flex items-center justify-between px-3.5 md:px-4 py-2 md:py-3.5 rounded-xl md:rounded-2xl text-xs md:text-sm font-medium transition cursor-pointer text-left whitespace-nowrap flex-shrink-0 ${
                     isActive
-                      ? "bg-[#F2F2F2] text-[#222222] font-semibold shadow-2xs"
-                      : "text-[#222222] hover:bg-[#F9F9F9]"
+                      ? "bg-[#222222] text-white md:bg-[#F2F2F2] md:text-[#222222] font-semibold shadow-2xs"
+                      : "bg-[#F7F7F7] text-[#222222] md:bg-transparent hover:bg-[#EBEBEB] md:hover:bg-[#F9F9F9]"
                   }`}
                 >
-                  <div className="flex items-center gap-3.5">
-                    <Icon className={`w-5 h-5 ${isActive ? "text-[#222222]" : "text-[#717171]"}`} />
+                  <div className="flex items-center gap-2 md:gap-3.5">
+                    <Icon className={`w-4 h-4 md:w-5 md:h-5 ${isActive ? "text-white md:text-[#222222]" : "text-[#717171]"}`} />
                     <span>{item.label}</span>
                   </div>
 
                   {item.isNew && (
-                    <span className="bg-[#FDF2F4] text-[#E00B41] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    <span className="hidden md:inline bg-[#FDF2F4] text-[#E00B41] text-[10px] font-bold px-2 py-0.5 rounded-full ml-2">
                       New
                     </span>
                   )}
@@ -1251,6 +1252,8 @@ export default function AccountSettingsPage() {
       )}
 
 
+    {/* Mobile Bottom Navigation */}
+    <MobileBottomNav />
     </div>
   );
 }

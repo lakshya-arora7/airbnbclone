@@ -339,24 +339,24 @@ export default function SearchDeck({
       )}
 
       {/* Interactive Segmented Search Capsule */}
-      <div className="flex justify-center w-full px-4 pb-5 pt-1.5 relative z-30">
+      <div className="flex justify-center w-full px-2 sm:px-4 pb-4 sm:pb-5 pt-1 sm:pt-1.5 relative z-30">
         <div
           className={`flex items-center rounded-full border transition-all duration-300 ease-out ${
             isOpen
-              ? "bg-[#EBEBEB] border-[#DDDDDD] shadow-[0_6px_24px_rgba(0,0,0,0.14)] p-2"
-              : "bg-white border-[#DDDDDD] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] p-1.5"
+              ? "bg-[#EBEBEB] border-[#DDDDDD] shadow-[0_6px_24px_rgba(0,0,0,0.14)] p-1 sm:p-2"
+              : "bg-white border-[#DDDDDD] shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] p-1 sm:p-1.5"
           } w-full max-w-2xl sm:max-w-[850px]`}
         >
           {/* Segment 1: Where */}
           <div
             onClick={() => onOpenTab("where")}
-            className={`flex-1 px-6 py-3 cursor-pointer transition-all duration-300 rounded-full ${
+            className={`flex-1 px-2.5 sm:px-6 py-1.5 sm:py-3 cursor-pointer transition-all duration-300 rounded-full ${
               activeTab === "where"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
-            <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.where", "Where")}</p>
+            <p className="text-[11px] sm:text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.where", "Where")}</p>
             {activeTab === "where" ? (
               <div className="flex items-center">
                 <input
@@ -371,7 +371,7 @@ export default function SearchDeck({
                     }
                   }}
                   placeholder={wherePlaceholder}
-                  className="w-full bg-transparent text-[15px] font-medium text-[#222222] focus:outline-none placeholder-[#717171] truncate"
+                  className="w-full bg-transparent text-xs sm:text-[15px] font-medium text-[#222222] focus:outline-none placeholder-[#717171] truncate"
                   onClick={(e) => e.stopPropagation()}
                 />
                 {location && (
@@ -382,19 +382,19 @@ export default function SearchDeck({
                     }}
                     className="p-1 rounded-full hover:bg-[#EBEBEB] text-[#717171]"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 )}
               </div>
             ) : (
-              <p className="text-[15px] font-medium text-[#717171] truncate">
+              <p className="text-xs sm:text-[15px] font-medium text-[#717171] truncate">
                 {location || wherePlaceholder}
               </p>
             )}
           </div>
 
           <span
-            className={`h-8 w-px transition-opacity duration-200 ${
+            className={`h-6 sm:h-8 w-px transition-opacity duration-200 ${
               activeTab === "where" || activeTab === "when" ? "opacity-0" : "bg-[#DDDDDD]"
             }`}
           />
@@ -402,20 +402,20 @@ export default function SearchDeck({
           {/* Segment 2: When */}
           <div
             onClick={() => onOpenTab("when")}
-            className={`flex-1 px-6 py-3 cursor-pointer transition-all duration-300 rounded-full ${
+            className={`flex-1 px-2.5 sm:px-6 py-1.5 sm:py-3 cursor-pointer transition-all duration-300 rounded-full ${
               activeTab === "when"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
-            <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.when", "When")}</p>
-            <p className="text-[15px] font-medium text-[#717171] truncate">
+            <p className="text-[11px] sm:text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.when", "When")}</p>
+            <p className="text-xs sm:text-[15px] font-medium text-[#717171] truncate">
               {getDisplayDates()}
             </p>
           </div>
 
           <span
-            className={`h-8 w-px transition-opacity duration-200 ${
+            className={`h-6 sm:h-8 w-px transition-opacity duration-200 ${
               activeTab === "when" || activeTab === "who" ? "opacity-0" : "bg-[#DDDDDD]"
             }`}
           />
@@ -423,15 +423,15 @@ export default function SearchDeck({
           {/* Segment 3: Who & Search Button */}
           <div
             onClick={() => onOpenTab("who")}
-            className={`flex-1 pl-6 pr-2.5 py-2 cursor-pointer transition-all duration-300 rounded-full flex items-center justify-between gap-2.5 ${
+            className={`flex-1 pl-2.5 sm:pl-6 pr-1 sm:pr-2.5 py-1 sm:py-2 cursor-pointer transition-all duration-300 rounded-full flex items-center justify-between gap-1.5 sm:gap-2.5 ${
               activeTab === "who"
                 ? "bg-white shadow-[0_4px_16px_rgba(0,0,0,0.14)]"
                 : "hover:bg-black/5"
             }`}
           >
-            <div className="truncate">
-              <p className="text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
-              <p className="text-[15px] font-medium text-[#717171] truncate">
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-[13px] font-extrabold tracking-wide text-[#222222]">{t("search.who", "Who")}</p>
+              <p className="text-xs sm:text-[15px] font-medium text-[#717171] truncate">
                 {getDisplayGuests()}
               </p>
             </div>
@@ -442,13 +442,13 @@ export default function SearchDeck({
                 e.stopPropagation();
                 handleExecuteSearch();
               }}
-              className={`rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-md ${
-                isOpen || activeTab === "who" ? "px-6 py-3 gap-2 text-[15px]" : "w-12 h-12 flex-shrink-0"
+              className={`rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-300 shadow-md ${
+                isOpen || activeTab === "who" ? "px-3 sm:px-6 py-2 sm:py-3 gap-1.5 sm:gap-2 text-xs sm:text-[15px]" : "w-9 h-9 sm:w-12 sm:h-12 flex-shrink-0"
               }`}
               aria-label="Search"
             >
-              <Search className="w-5 h-5 stroke-[2.8]" />
-              {(isOpen || activeTab === "who") && <span className="pr-1 font-bold">{t("search.search", "Search")}</span>}
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.8]" />
+              {(isOpen || activeTab === "who") && <span className="pr-0.5 sm:pr-1 font-bold">{t("search.search", "Search")}</span>}
             </button>
           </div>
         </div>
@@ -463,7 +463,7 @@ export default function SearchDeck({
           <div className="w-full max-w-2xl sm:max-w-3xl relative pointer-events-auto">
             {/* 1. WHERE POPOVER (Matches Screenshot 2: Aligned to Left Edge of Capsule) */}
             <div
-              className={`absolute top-0 left-0 w-[460px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-6 transition-all duration-300 ease-out origin-top-left ${
+              className={`absolute top-0 left-0 w-[460px] max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto overscroll-contain bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-4 sm:p-6 transition-all duration-300 ease-out origin-top-left menu-scrollbar ${
                 activeTab === "where"
                   ? "opacity-100 scale-100 translate-y-0 visible"
                   : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
@@ -588,7 +588,7 @@ export default function SearchDeck({
 
             {/* 2. WHEN POPOVER (Matches Screenshot 1: Centered under Capsule) */}
             <div
-              className={`absolute top-0 left-1/2 -translate-x-1/2 w-[820px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-7 transition-all duration-300 ease-out origin-top ${
+              className={`absolute top-0 left-1/2 -translate-x-1/2 w-[820px] max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto overscroll-contain bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-4 sm:p-7 transition-all duration-300 ease-out origin-top menu-scrollbar ${
                 activeTab === "when"
                   ? "opacity-100 scale-100 translate-y-0 visible"
                   : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"
@@ -771,7 +771,7 @@ export default function SearchDeck({
 
             {/* 3. WHO POPOVER (Matches Screenshot 3: Aligned to Right Edge of Capsule) */}
             <div
-              className={`absolute top-0 right-0 w-[420px] max-w-[calc(100vw-32px)] bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-6 transition-all duration-300 ease-out origin-top-right ${
+              className={`absolute top-0 right-0 w-[420px] max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto overscroll-contain bg-white rounded-[32px] border border-[#DDDDDD] shadow-[0_12px_36px_rgba(0,0,0,0.16)] p-4 sm:p-6 transition-all duration-300 ease-out origin-top-right menu-scrollbar ${
                 activeTab === "who"
                   ? "opacity-100 scale-100 translate-y-0 visible"
                   : "opacity-0 scale-95 -translate-y-2 invisible pointer-events-none"

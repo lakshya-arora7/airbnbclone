@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 import Navbar from "@/components/header/Navbar";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import ListingCard from "@/components/listings/ListingCard";
 import { Heart, Sparkles } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
@@ -26,7 +27,7 @@ export default function WishlistsPage() {
     <div className="min-h-screen bg-white text-[#222222]">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 sm:pb-10">
         <div className="mb-8">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-[#222222]">Wishlists</h1>
@@ -78,6 +79,9 @@ export default function WishlistsPage() {
           </div>
         )}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

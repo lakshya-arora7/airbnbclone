@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Navbar from "@/components/header/Navbar";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
 import { Calendar, MapPin, CheckCircle, Star } from "lucide-react";
@@ -109,7 +110,7 @@ export default function MyTripsPage() {
     <div className="min-h-screen bg-white text-[#222222] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 pb-24 sm:pb-8 flex flex-col">
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#EBEBEB]">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#222222]">
@@ -351,6 +352,9 @@ export default function MyTripsPage() {
           }}
         />
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

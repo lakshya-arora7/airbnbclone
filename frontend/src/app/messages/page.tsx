@@ -6,6 +6,7 @@ import {
   Search,
   Settings,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   ArrowUp,
   X,
@@ -20,6 +21,7 @@ import {
   Home
 } from "lucide-react";
 import Link from "next/link";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import { useLanguageCurrency } from "@/context/LanguageCurrencyContext";
 import { useAuthPersona } from "@/context/AuthPersonaContext";
 import { api } from "@/lib/api";
@@ -189,7 +191,7 @@ export default function MessagesPage() {
     <div className="min-h-screen bg-white text-[#222222] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-[1680px] w-full mx-auto px-2 sm:px-4 lg:px-8 py-4 flex flex-col">
+      <main className="flex-1 max-w-[1680px] w-full mx-auto px-2 sm:px-4 lg:px-8 py-4 pb-20 sm:pb-4 flex flex-col">
         {/* If no conversations at all across the application, show clean zero-state */}
         {!isLoading && threads.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-20 text-center border border-[#EBEBEB] rounded-3xl bg-white shadow-xs my-4">
@@ -216,7 +218,7 @@ export default function MessagesPage() {
           /* Active 3-Column Messaging Interface */
           <div className="flex-1 grid grid-cols-1 md:grid-cols-12 border border-[#EBEBEB] rounded-3xl overflow-hidden bg-white shadow-xs min-h-[720px]">
             {/* COLUMN 1: Threads List (Width: 4 cols) */}
-            <div className="md:col-span-4 lg:col-span-4 border-r border-[#EBEBEB] flex flex-col bg-white">
+            <div className={`md:col-span-4 lg:col-span-4 border-r border-[#EBEBEB] flex-col bg-white ${activeThread ? "hidden md:flex" : "flex"}`}>
               {/* Header: Messages + Search */}
               <div className="p-4 border-b border-[#F0F0F0]">
                 <div className="flex items-center justify-between mb-4">
@@ -365,7 +367,7 @@ export default function MessagesPage() {
             </div>
 
             {/* COLUMN 2: Active Chat Stream */}
-            <div className="md:col-span-8 lg:col-span-5 flex flex-col bg-white border-r border-[#EBEBEB]">
+            <div className={`md:col-span-8 lg:col-span-5 flex-col bg-white border-r border-[#EBEBEB] ${activeThread ? "flex" : "hidden md:flex"}`}>
               {!activeThread ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-[#717171]">
                   <MessageSquare className="w-12 h-12 text-[#DDDDDD] mb-3" />
@@ -377,8 +379,17 @@ export default function MessagesPage() {
               ) : (
                 <>
                   {/* Chat Header */}
-                  <div className="px-6 py-4 border-b border-[#F0F0F0] flex items-center justify-between bg-white">
-                    <div className="flex items-center gap-3">
+                  <div className="px-4 sm:px-6 py-4 border-b border-[#F0F0F0] flex items-center justify-between bg-white">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setActiveThreadId(null)}
+                        className="md:hidden p-1.5 -ml-2 rounded-full hover:bg-[#F7F7F7] text-[#222222] cursor-pointer"
+                        aria-label="Back to conversations"
+                        title="Back"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
                       <img
                         src={
                           activeThread.other_user.avatar_url ||
@@ -589,6 +600,9 @@ export default function MessagesPage() {
           </div>
         )}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

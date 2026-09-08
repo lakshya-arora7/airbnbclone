@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, use, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import {
   SlidersHorizontal,
   Search,
@@ -409,7 +410,7 @@ function SearchResultsContent({ params }: PageProps) {
       {/* ============================================================ */}
       {/* 3. SPLIT SCREEN: LISTINGS ON LEFT, MAP ON RIGHT              */}
       {/* ============================================================ */}
-      <main className={`flex-1 flex ${isMapVisible ? "flex-col-reverse lg:flex-row" : "flex-col"} w-full`}>
+      <main className={`flex-1 flex ${isMapVisible ? "flex-col-reverse lg:flex-row" : "flex-col"} pb-24 sm:pb-6 w-full`}>
         {/* Left Side: Listing Cards Column */}
         <div className={`px-4 sm:px-8 py-6 overflow-y-auto ${isMapVisible ? "w-full lg:w-[55%] xl:w-[58%]" : "w-full max-w-7xl mx-auto"}`}>
           {/* Subheading matching screenshot */}
@@ -579,7 +580,7 @@ function SearchResultsContent({ params }: PageProps) {
       </main>
 
       {/* Floating Show Map / Show List Pill Button for Search Results */}
-      <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-20 sm:bottom-7 left-1/2 -translate-x-1/2 z-40">
         <button
           onClick={() => {
             setIsMapVisible(!isMapVisible);
@@ -608,6 +609,9 @@ function SearchResultsContent({ params }: PageProps) {
         initialFilters={{ amenities: activeFilters }}
         totalCount={filteredListings.length}
       />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
