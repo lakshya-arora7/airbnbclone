@@ -115,6 +115,8 @@ The application uses a relational SQLite database with foreign key cascades and 
 ## Deployment & Live URLs
 
 - **GitHub Repository**: [https://github.com/lakshya-arora7/airbnbclone](https://github.com/lakshya-arora7/airbnbclone)
-- **Backend (Railway)**: `https://airbnbclone-production-cbcb.up.railway.app`
-- **Frontend (Vercel)**: Deployed from `main` branch.
+- **Frontend Live URL (Vercel)**: [https://airbnbclonela.vercel.app](https://airbnbclonela.vercel.app)
+- **Backend API Live URL (Railway)**: [https://airbnbclone-production-cbcb.up.railway.app](https://airbnbclone-production-cbcb.up.railway.app)
+- **API Health Check**: [https://airbnbclone-production-cbcb.up.railway.app/health](https://airbnbclone-production-cbcb.up.railway.app/health)
+- **Interactive API Swagger Docs**: [https://airbnbclone-production-cbcb.up.railway.app/docs](https://airbnbclone-production-cbcb.up.railway.app/docs)
 
