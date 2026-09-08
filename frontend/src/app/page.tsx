@@ -19,7 +19,6 @@ import {
   List,
   Home as HomeIcon,
   Globe as GlobeIcon,
-  Loader2,
   X
 } from "lucide-react";
 
@@ -118,11 +117,8 @@ export default function Home() {
     amenities: []
   });
 
-  // Pagination & Infinite Scroll State (4 stays per page to easily test multiple pages & scroll)
-  const [scrollMode, setScrollMode] = useState<"pagination" | "infinite">("pagination");
+  // Pagination State (4 stays per page)
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [visibleCount, setVisibleCount] = useState<number>(4);
-  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const PAGE_SIZE = 4;
 
   const fetchListings = useCallback(() => {
@@ -152,7 +148,6 @@ export default function Home() {
   // Reset pagination whenever filters, category, or search query change
   useEffect(() => {
     setCurrentPage(1);
-    setVisibleCount(PAGE_SIZE);
   }, [searchParams, filterParams, selectedCategory, activeMode]);
 
   // Filter listings based on search parameters and selectedCategory
@@ -194,48 +189,11 @@ export default function Home() {
   // Total pages
   const totalPages = Math.max(1, Math.ceil(filteredListings.length / PAGE_SIZE));
 
-  // Displayed listings depending on scrollMode
+  // Displayed listings with pagination
   const displayedListings = useMemo(() => {
-    if (scrollMode === "pagination") {
-      const start = (currentPage - 1) * PAGE_SIZE;
-      return filteredListings.slice(start, start + PAGE_SIZE);
-    } else {
-      return filteredListings.slice(0, visibleCount);
-    }
-  }, [filteredListings, scrollMode, currentPage, visibleCount, PAGE_SIZE]);
-
-  // Load more for Infinite Scroll
-  const handleLoadMore = useCallback(() => {
-    if (visibleCount < filteredListings.length && !isLoadingMore) {
-      setIsLoadingMore(true);
-      setTimeout(() => {
-        setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredListings.length));
-        setIsLoadingMore(false);
-      }, 350);
-    }
-  }, [visibleCount, filteredListings.length, isLoadingMore]);
-
-  // IntersectionObserver Sentinel for Infinite Scroll
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (scrollMode !== "infinite") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleCount < filteredListings.length) {
-          handleLoadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    const el = sentinelRef.current;
-    if (el) {
-      observer.observe(el);
-    }
-    return () => {
-      if (el) observer.unobserve(el);
-      observer.disconnect();
-    };
-  }, [scrollMode, visibleCount, filteredListings.length, handleLoadMore]);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredListings.slice(start, start + PAGE_SIZE);
+  }, [filteredListings, currentPage, PAGE_SIZE]);
 
   // Dynamic search pill summary text
   const searchSummary = useMemo(() => {
@@ -454,134 +412,62 @@ export default function Home() {
                       ))}
                     </div>
 
-                    {/* Pagination or Infinite Scroll Controls */}
-                    <div className="mt-12 mb-8 pt-8 border-t border-[#EBEBEB] flex flex-col items-center gap-5 w-full">
-                      {/* View Mode Switcher Pill */}
-                      <div className="flex items-center gap-1 bg-[#F2F2F2] p-1 rounded-full text-xs font-semibold text-[#717171]">
-                        <button
-                          type="button"
-                          onClick={() => setScrollMode("pagination")}
-                          className={`px-4 py-1.5 rounded-full transition cursor-pointer ${
-                            scrollMode === "pagination"
-                              ? "bg-white text-[#222222] shadow-xs font-bold"
-                              : "hover:text-[#222222]"
-                          }`}
-                        >
-                          Pages (1, 2...)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setScrollMode("infinite")}
-                          className={`px-4 py-1.5 rounded-full transition cursor-pointer ${
-                            scrollMode === "infinite"
-                              ? "bg-white text-[#222222] shadow-xs font-bold"
-                              : "hover:text-[#222222]"
-                          }`}
-                        >
-                          Infinite scroll
-                        </button>
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="mt-12 mb-8 pt-8 border-t border-[#EBEBEB] flex flex-col items-center gap-3 w-full">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurrentPage((p) => Math.max(1, p - 1));
+                              window.scrollTo({ top: 120, behavior: "smooth" });
+                            }}
+                            disabled={currentPage === 1}
+                            className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                            aria-label="Previous page"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            <button
+                              key={pageNum}
+                              type="button"
+                              onClick={() => {
+                                setCurrentPage(pageNum);
+                                window.scrollTo({ top: 120, behavior: "smooth" });
+                              }}
+                              className={`w-9 h-9 rounded-full text-xs font-bold transition cursor-pointer ${
+                                currentPage === pageNum
+                                  ? "bg-[#222222] text-white shadow-xs"
+                                  : "bg-transparent text-[#222222] hover:bg-[#F7F7F7]"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCurrentPage((p) => Math.min(totalPages, p + 1));
+                              window.scrollTo({ top: 120, behavior: "smooth" });
+                            }}
+                            disabled={currentPage === totalPages}
+                            className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                            aria-label="Next page"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-[#717171]">
+                          Showing {(currentPage - 1) * PAGE_SIZE + 1} –{" "}
+                          {Math.min(currentPage * PAGE_SIZE, filteredListings.length)} of{" "}
+                          {filteredListings.length} stays
+                        </p>
                       </div>
-
-                      {/* Pagination Controls */}
-                      {scrollMode === "pagination" && (
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCurrentPage((p) => Math.max(1, p - 1));
-                                window.scrollTo({ top: 120, behavior: "smooth" });
-                              }}
-                              disabled={currentPage === 1}
-                              className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
-                              aria-label="Previous page"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                              <button
-                                key={pageNum}
-                                type="button"
-                                onClick={() => {
-                                  setCurrentPage(pageNum);
-                                  window.scrollTo({ top: 120, behavior: "smooth" });
-                                }}
-                                className={`w-9 h-9 rounded-full text-xs font-bold transition cursor-pointer ${
-                                  currentPage === pageNum
-                                    ? "bg-[#222222] text-white shadow-xs"
-                                    : "bg-transparent text-[#222222] hover:bg-[#F7F7F7]"
-                                }`}
-                              >
-                                {pageNum}
-                              </button>
-                            ))}
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCurrentPage((p) => Math.min(totalPages, p + 1));
-                                window.scrollTo({ top: 120, behavior: "smooth" });
-                              }}
-                              disabled={currentPage === totalPages}
-                              className="w-9 h-9 rounded-full border border-[#DDDDDD] flex items-center justify-center text-[#222222] hover:border-[#222222] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
-                              aria-label="Next page"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <p className="text-xs text-[#717171]">
-                            Showing {(currentPage - 1) * PAGE_SIZE + 1} –{" "}
-                            {Math.min(currentPage * PAGE_SIZE, filteredListings.length)} of{" "}
-                            {filteredListings.length} stays
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Infinite Scroll Controls */}
-                      {scrollMode === "infinite" && (
-                        <div className="flex flex-col items-center gap-3 w-full max-w-sm">
-                          <div className="w-full text-center space-y-1.5">
-                            <p className="text-xs text-[#717171] font-medium">
-                              Showing {Math.min(visibleCount, filteredListings.length)} of {filteredListings.length} stays
-                            </p>
-                            <div className="w-full bg-[#EBEBEB] h-1.5 rounded-full overflow-hidden">
-                              <div
-                                className="bg-[#222222] h-full transition-all duration-300 rounded-full"
-                                style={{
-                                  width: `${Math.min(100, (visibleCount / filteredListings.length) * 100)}%`
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {visibleCount < filteredListings.length ? (
-                            <button
-                              type="button"
-                              onClick={handleLoadMore}
-                              disabled={isLoadingMore}
-                              className="px-6 py-2.5 rounded-full border border-[#222222] bg-white text-[#222222] hover:bg-[#F7F7F7] text-xs font-bold transition flex items-center gap-2 cursor-pointer active:scale-95 shadow-xs"
-                            >
-                              {isLoadingMore ? (
-                                <>
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  <span>Loading more stays...</span>
-                                </>
-                              ) : (
-                                <span>Show more stays ({filteredListings.length - visibleCount} remaining)</span>
-                              )}
-                            </button>
-                          ) : (
-                            <p className="text-xs text-[#717171] italic">
-                              You’ve viewed all {filteredListings.length} stays
-                            </p>
-                          )}
-
-                          <div ref={sentinelRef} className="h-4 w-full pointer-events-none" />
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </>
                 )}
               </>
