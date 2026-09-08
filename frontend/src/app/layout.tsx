@@ -6,8 +6,8 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import LanguageCurrencyModal from "@/components/modals/LanguageCurrencyModal";
 
 export const metadata: Metadata = {
-  title: "Airbnb | Holiday Rentals, Cabins, Beach Houses & Experiences",
-  description: "Find holiday rentals, cabins, beach houses, unique homes and experiences around the world on Airbnb.",
+  title: "bnbair | Holiday Rentals, Cabins, Beach Houses & Experiences",
+  description: "Find holiday rentals, cabins, beach houses, unique homes and experiences around the world on bnbair.",
 };
 
 export default function RootLayout({

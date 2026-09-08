@@ -84,21 +84,11 @@ export default function AuthModal({ isOpen, onClose, initialRole = "GUEST" }: Au
           </div>
         ) : (
           <div>
-            {/* 1. Airbnb Outlined Bélo SVG Logo matching Screenshot */}
+            {/* 1. Brand Logo */}
             <div className="flex justify-center pt-2">
-              <svg
-                className="w-10 h-10 text-[#FF385C]"
-                viewBox="0 0 32 32"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M16 3c-1.8 0-3.3 1.2-4.4 3.2L6.8 15.5c-1.6 3.1-1.6 6.7.1 9.7 1.8 3.1 5.1 4.8 8.6 4.8s6.8-1.7 8.6-4.8c1.7-3 1.7-6.6.1-9.7l-4.8-9.3C19.3 4.2 17.8 3 16 3z" />
-                <path d="M16 16.5c-2 0-3.5 1.5-3.5 3.5s1.5 3.5 3.5 3.5 3.5-1.5 3.5-3.5-1.5-3.5-3.5-3.5z" />
-              </svg>
+              <span className="font-extrabold text-[28px] tracking-tight text-[#FF385C] select-none">
+                bnbair
+              </span>
             </div>
 
             {/* 2. Heading matching Screenshot */}

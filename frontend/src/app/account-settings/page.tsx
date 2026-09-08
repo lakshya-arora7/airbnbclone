@@ -178,16 +178,11 @@ export default function AccountSettingsPage() {
       {/* 1. TOP HEADER MATCHING SCREENSHOT 1                                        */}
       {/* ========================================================================= */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 sm:px-12 py-4 flex items-center justify-between">
-        {/* Left: Official Single Bélo Icon matching Screenshot 1 */}
-        <Link href="/" className="flex items-center gap-2 group cursor-pointer" title="Airbnb Home">
-          <svg
-            className="h-8.5 w-auto text-[#FF385C] transition-transform group-hover:scale-105"
-            viewBox="0 0 32 32"
-            fill="currentColor"
-          >
-            <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.371c0 4.14-3.328 7.75-8.5 7.75-3.08 0-5.836-1.503-7.5-3.873-1.664 2.37-4.42 3.873-7.5 3.873-5.172 0-8.5-3.61-8.5-7.75 0-1.127.284-2.22.971-3.767l.145-.353c.986-2.296 5.146-11.006 7.1-14.836l.533-1.025C8.537 1.963 9.992 1 12 1h4zm0 2.5h-4c-1.144 0-2.083.568-3.083 2.387l-.462.887C6.54 10.536 2.42 19.167 1.48 21.36c-.57 1.306-.78 2.062-.78 2.89 0 2.98 2.348 5.25 6.3 5.25 3.018 0 5.485-1.742 6.577-4.444l.423-1.146.423 1.146c1.092 2.702 3.559 4.444 6.577 4.444 3.952 0 6.3-2.27 6.3-5.25 0-.828-.21-1.584-.78-2.89-.94-2.193-5.06-10.824-6.975-14.586l-.462-.887C19.083 4.068 18.144 3.5 17 3.5h-1zm0 13c2.485 0 4.5 2.015 4.5 4.5S18.485 24.5 16 24.5s-4.5-2.015-4.5-4.5 2.015-4.5 4.5-4.5zm0 2.5c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
-          </svg>
-          <span className="font-bold text-xl tracking-tight text-[#FF385C] hidden sm:inline">airbnb</span>
+        {/* Left: Brand Logo */}
+        <Link href="/" className="flex items-center gap-2 group cursor-pointer" title="bnbair Home">
+          <span className="font-extrabold text-[24px] sm:text-[26px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+            bnbair
+          </span>
         </Link>
 
         {/* Right: Done Pill Button matching Screenshot 1 */}

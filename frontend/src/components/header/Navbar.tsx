@@ -175,85 +175,79 @@ export default function Navbar({
     <header className="sticky top-0 z-50 bg-white border-b border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       {/* Top Row: Symmetrical 3-Column Layout (1fr auto 1fr) for Perfect Center Alignment */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 grid grid-cols-[1fr_auto_1fr] items-center">
-        {/* Column 1 (Left): Brand Logo */}
+        {/* Column 1 (Left): Brand Name "bnbair" */}
         <div className="flex items-center justify-start">
-          <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="Airbnb">
-            <svg
-              className="h-8.5 w-auto text-[#FF385C] transition-transform group-hover:scale-105"
-              viewBox="0 0 32 32"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.371c0 4.14-3.328 7.75-8.5 7.75-3.08 0-5.836-1.503-7.5-3.873-1.664 2.37-4.42 3.873-7.5 3.873-5.172 0-8.5-3.61-8.5-7.75 0-1.127.284-2.22.971-3.767l.145-.353c.986-2.296 5.146-11.006 7.1-14.836l.533-1.025C8.537 1.963 9.992 1 12 1h4zm0 2.5h-4c-1.144 0-2.083.568-3.083 2.387l-.462.887C6.54 10.536 2.42 19.167 1.48 21.36c-.57 1.306-.78 2.062-.78 2.89 0 2.98 2.348 5.25 6.3 5.25 3.018 0 5.485-1.742 6.577-4.444l.423-1.146.423 1.146c1.092 2.702 3.559 4.444 6.577 4.444 3.952 0 6.3-2.27 6.3-5.25 0-.828-.21-1.584-.78-2.89-.94-2.193-5.06-10.824-6.975-14.586l-.462-.887C19.083 4.068 18.144 3.5 17 3.5h-1zm0 13c2.485 0 4.5 2.015 4.5 4.5S18.485 24.5 16 24.5s-4.5-2.015-4.5-4.5 2.015-4.5 4.5-4.5zm0 2.5c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
-            </svg>
-            <span className="font-bold text-xl tracking-tight text-[#FF385C] hidden sm:inline">airbnb</span>
+          <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
+            <span className="font-extrabold text-[26px] tracking-tight text-[#FF385C] transition-transform group-hover:scale-105 select-none">
+              bnbair
+            </span>
           </Link>
         </div>
 
-        {/* Column 2 (Center): The 3 Mode Switchers - Smooth Animated Pink Icons */}
+        {/* Column 2 (Center): The 3 Mode Switchers - Symmetrical & Enlarged */}
         <div className="flex items-center justify-center">
-          <nav className="flex items-center gap-4 sm:gap-8 h-full">
-            {/* All: Simple Pink Globe */}
+          <nav className="flex items-center gap-5 sm:gap-9 h-full">
+            {/* All: Globe */}
             <button
               onClick={() => onSelectMode?.("all")}
-              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "all" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "all" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Globe className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
+                <Globe className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "all" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.all", "All")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "all" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
             </button>
 
-            {/* Homes: Simple Pink House */}
+            {/* Homes: House */}
             <button
               onClick={() => onSelectMode?.("homes")}
-              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "homes" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "homes" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Home className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
+                <Home className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "homes" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.homes", "Homes")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "homes" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
             </button>
 
-            {/* Experiences: Simple Pink Sparkles */}
+            {/* Experiences: Sparkles */}
             <button
               onClick={() => onSelectMode?.("experiences")}
-              className={`flex items-center gap-2 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
+              className={`flex items-center gap-2.5 h-full relative transition-all duration-300 ease-out group py-2 cursor-pointer ${
                 activeMode === "experiences" ? "text-[#FF385C]" : "text-[#717171] hover:text-[#FF385C]"
               }`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 ${
                 activeMode === "experiences" ? "bg-[#FFF0F3] text-[#FF385C] scale-105 shadow-xs" : "bg-gray-100 text-[#717171] group-hover:bg-[#FFF0F3] group-hover:text-[#FF385C]"
               }`}>
-                <Sparkles className="w-4 h-4 transition-transform duration-300" strokeWidth={2.2} />
+                <Sparkles className="w-5 h-5 transition-transform duration-300" strokeWidth={2.2} />
               </div>
-              <span className={`text-[15px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
+              <span className={`text-[16px] tracking-tight transition-colors duration-300 ease-out ${activeMode === "experiences" ? "font-bold text-[#FF385C]" : "font-semibold text-[#717171]"}`}>
                 {t("nav.experiences", "Experiences")}
               </span>
               <span
-                className={`absolute -bottom-1 left-0 right-0 h-[2.5px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
+                className={`absolute -bottom-1 left-0 right-0 h-[3px] bg-[#FF385C] rounded-full transition-all duration-300 ease-out origin-center ${
                   activeMode === "experiences" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0 pointer-events-none"
                 }`}
               />
@@ -261,50 +255,56 @@ export default function Navbar({
           </nav>
         </div>
 
-        {/* Column 3 (Right): Role Switcher, Language/Currency, Profile Menu */}
-        <div className="flex items-center justify-end gap-2 relative" ref={menuRef}>
+        {/* Column 3 (Right): Switch Role, Globe, Separate Profile Logo, and 3-Lines Dropdown */}
+        <div className="flex items-center justify-end gap-2.5 sm:gap-3.5 relative" ref={menuRef}>
           <button
             onClick={handleToggleHostRole}
-            className="text-sm font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-3.5 py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
+            className="text-[15px] font-semibold text-[#222222] hover:bg-[#FFF0F3] hover:text-[#FF385C] px-4 py-2.5 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:inline-block"
           >
             {isHost ? t("nav.switchToTravelling", "Switch to travelling") : t("nav.switchToHosting", "Switch to hosting")}
           </button>
 
-          {/* Simple Pink Globe Icon for Language & Currency */}
+          {/* Simple Globe Icon for Language & Currency */}
           <button
             onClick={openLanguageModal}
-            className="p-2.5 rounded-full hover:bg-[#FFF0F3] text-[#FF385C] transition cursor-pointer flex-shrink-0"
+            className="p-2.5 sm:p-3 rounded-full hover:bg-[#FFF0F3] text-[#222222] hover:text-[#FF385C] transition cursor-pointer flex-shrink-0"
             aria-label="Choose a language and currency"
+            title="Language & Currency"
           >
-            <Globe className="w-4 h-4 text-[#FF385C]" />
+            <Globe className="w-5 h-5" />
           </button>
 
-          {/* Authentic Airbnb User Menu Capsule Button with Pink Accents */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex items-center gap-2.5 border border-[#DDDDDD] hover:border-[#FF385C] hover:shadow-md transition bg-white pl-3.5 pr-2 py-1.5 rounded-full cursor-pointer relative"
-            aria-label="Main menu"
+          {/* 1. SEPARATE PROFILE LOGO: Clicking directly opens users profile section */}
+          <Link
+            href="/profile"
+            className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-full overflow-hidden border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition flex items-center justify-center bg-[#FFF0F3] relative flex-shrink-0 cursor-pointer group"
+            aria-label="User profile"
+            title="View Profile"
           >
-            <Menu className="w-4 h-4 text-[#FF385C]" />
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-[#DDDDDD] bg-[#FFF0F3] flex items-center justify-center relative">
-              {persona.avatarUrl ? (
-                <img src={persona.avatarUrl} alt={persona.fullName} className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-4 h-4 text-[#FF385C]" />
-              )}
-            </div>
+            {persona.avatarUrl ? (
+              <img
+                src={persona.avatarUrl}
+                alt={persona.fullName}
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <User className="w-5 h-5 text-[#FF385C]" />
+            )}
             {/* Notification badge */}
             {(unreadNotifsCount + unreadMsgsCount) > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#FF385C] rounded-full border-2 border-white ring-1 ring-rose-200" />
+              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#FF385C] rounded-full border-2 border-white ring-1 ring-rose-200" />
             )}
-            {/* Role indicator badge */}
-            <span
-              className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full hidden sm:inline-block ${
-                isHost ? "bg-amber-100 text-amber-800" : "bg-[#FFF0F3] text-[#FF385C]"
-              }`}
-            >
-              {isHost ? "Host" : "Guest"}
-            </span>
+          </Link>
+
+          {/* 2. THREE LINES DROPDOWN: Placed AFTER profile logo */}
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="w-10 h-10 sm:w-10.5 sm:h-10.5 rounded-full border border-[#DDDDDD] hover:border-[#222222] hover:shadow-md transition bg-white flex items-center justify-center cursor-pointer text-[#222222] flex-shrink-0"
+            aria-label="Main menu"
+            title="Main menu"
+          >
+            <Menu className="w-5 h-5 text-[#222222]" strokeWidth={2.2} />
           </button>
 
           {/* Exact Dropdown Menu with Complete Lucide Icons */}
