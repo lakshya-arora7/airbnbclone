@@ -330,11 +330,29 @@ def seed_five_sample_listings(db=None):
             status="CONFIRMED",
             created_at=datetime.now(timezone.utc)
         )
+        booking_completed = Booking(
+            id=4,
+            confirmation_code="HM-CMP942",
+            listing_id=3,
+            guest_id=1,
+            check_in=today - timedelta(days=22),
+            check_out=today - timedelta(days=19),
+            guests_count=2,
+            nightly_rate=8900.0,
+            total_nights=3,
+            cleaning_fee=400.0,
+            service_fee=3738.0,
+            total_price=(8900.0 * 3) + 400.0 + 3738.0,
+            payment_method="UPI / Net Banking",
+            status="COMPLETED",
+            created_at=datetime.now(timezone.utc) - timedelta(days=25)
+        )
         db.add(booking_1)
         db.add(booking_2)
+        db.add(booking_completed)
         db.commit()
 
-        print(f"[Success] Seeded exactly 5 listings and 2 verified bookings successfully into {engine.url}!")
+        print(f"[Success] Seeded exactly 5 listings and bookings (confirmed & completed) successfully into {engine.url}!")
         return True
     except Exception as e:
         db.rollback()
