@@ -181,7 +181,7 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       {/* Top Row: Symmetrical 3-Column Layout (1fr auto 1fr) for Perfect Center Alignment */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center">
+      <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center">
         {/* Column 1 (Left): Brand Name "bnbair" */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">

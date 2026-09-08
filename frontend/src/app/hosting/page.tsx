@@ -324,7 +324,7 @@ export default function HostDashboardPage() {
       {/* ========================================================================= */}
       {/* 1. TOP HOST NAVBAR MATCHING SCREENSHOTS 1, 2, 3, 4                        */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-4 sm:px-8 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 sm:px-10 lg:px-12 xl:px-16 h-[88px] sm:h-[94px] grid grid-cols-[1fr_auto_1fr] items-center shadow-2xs">
         {/* Left: Brand Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0" title="bnbair">
